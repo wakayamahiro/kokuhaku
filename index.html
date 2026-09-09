@@ -1,107 +1,856 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>告白タイミング</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;700;800;900&display=swap" rel="stylesheet">
+
+<!-- Firebase (compat SDK) : オンライン対戦用 -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
 <style>
-:root{--bg:#0e1018;--panel:#171a26;--panel2:#202435;--line:#30364a;--text:#f5f6fb;--muted:#aeb5c8;--pink:#ff6fae;--purple:#9b8cff;--gold:#ffd166;--ok:#62d49b;--danger:#ff687d;--shadow:0 14px 40px rgba(0,0,0,.28)}
-*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 20% 0,#292039 0,#0e1018 42%);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Noto Sans JP",sans-serif;min-height:100vh}button,input{font:inherit}.app{max-width:1080px;margin:auto;padding:22px}.top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:18px}.title{font-size:28px;font-weight:900;letter-spacing:.03em}.subtitle{color:var(--muted);font-size:13px}.card{background:rgba(23,26,38,.94);border:1px solid var(--line);border-radius:18px;padding:18px;box-shadow:var(--shadow);margin-bottom:14px}.center{text-align:center}.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.grow{flex:1}.btn{border:1px solid var(--line);background:#24293a;color:var(--text);border-radius:12px;padding:11px 15px;cursor:pointer;transition:.15s}.btn:hover{transform:translateY(-1px);filter:brightness(1.08)}.btn.primary{background:linear-gradient(135deg,#ff5fa5,#9b76ff);border:0;font-weight:800}.btn.ok{background:#193d31;border-color:#2d765b}.btn.danger{background:#4a2029;border-color:#783541}.btn:disabled{opacity:.45;cursor:not-allowed;transform:none}.block{width:100%}input{width:100%;background:#0f1220;color:var(--text);border:1px solid var(--line);border-radius:11px;padding:11px 12px;outline:none}input:focus{border-color:var(--purple)}label{display:block;font-size:12px;color:var(--muted);margin:0 0 6px}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.stat{background:#111521;border:1px solid var(--line);border-radius:12px;padding:10px;text-align:center}.stat b{display:block;font-size:20px}.small{font-size:13px}.muted{color:var(--muted)}.hidden{display:none!important}.room{font-size:34px;font-weight:900;letter-spacing:.18em;color:var(--gold);padding:8px}.seats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.seat{padding:10px 12px;background:#111521;border:1px solid var(--line);border-radius:10px}.seat.me{border-color:var(--pink)}.phase{display:inline-flex;padding:5px 9px;border-radius:999px;background:#2a2035;color:#f2b7ff;font-size:12px}.cards{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}.date{min-height:205px;background:linear-gradient(160deg,#23283a,#151824);border:1px solid var(--line);border-radius:15px;padding:13px;position:relative;cursor:pointer}.date.selected{border:2px solid var(--pink);box-shadow:0 0 0 3px rgba(255,111,174,.12)}.date.used{opacity:.35;cursor:not-allowed}.date .icon{font-size:38px}.date .name{font-size:17px;font-weight:800;margin-top:6px}.pill{display:inline-block;padding:4px 7px;border-radius:999px;background:#30364b;font-size:11px;margin:4px 3px 0 0}.value{font-size:20px;font-weight:900;color:var(--gold);margin-top:6px}.topic{margin-top:10px;color:#d6dbee;font-size:12px}.women{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.woman{padding:14px;border:1px solid var(--line);border-radius:13px;background:#111521}.woman.selected{border-color:var(--pink);background:#271a29}.notice{padding:12px;border-radius:12px;background:#111521;border:1px solid var(--line)}.log{max-height:180px;overflow:auto;font-size:12px;color:var(--muted);line-height:1.7}.big{font-size:42px;font-weight:900}.beauty{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.beauty .card{margin:0;text-align:center}.win{border-color:var(--gold);box-shadow:0 0 0 2px rgba(255,209,102,.15),var(--shadow)}.result-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.rank{font-size:18px;font-weight:900}.footer{color:var(--muted);font-size:11px;text-align:center;padding:20px}.error{color:#ff9aa8;margin-top:8px}
-@media(max-width:800px){.cards{grid-template-columns:repeat(2,1fr)}.grid,.beauty{grid-template-columns:repeat(2,1fr)}.stats{grid-template-columns:repeat(2,1fr)}.seats,.women{grid-template-columns:1fr 1fr}}@media(max-width:520px){.app{padding:12px}.cards{grid-template-columns:1fr}.grid,.beauty,.seats,.women,.result-grid{grid-template-columns:1fr}.title{font-size:22px}}
+:root{
+  --pink:#ff6fa0; --pink-deep:#ff4d8a;
+  --yellow:#ffb020; --green:#29b678; --purple:#9b6fe0;
+  --ink:#3a2e46; --muted:#8d7fa0;
+  --card:#ffffff; --line:#f0d9ea;
+  --radius:16px; --shadow:0 8px 20px rgba(155,111,224,.18);
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:
+    radial-gradient(circle at 15% 10%, #ffe1ef 0%, transparent 45%),
+    radial-gradient(circle at 85% 15%, #e2e6ff 0%, transparent 45%),
+    radial-gradient(circle at 50% 90%, #fff6d8 0%, transparent 50%),
+    linear-gradient(160deg, #fff0f6, #f3eeff 60%, #fffaf0);
+  color:var(--ink);
+  font-family:"M PLUS Rounded 1c","Hiragino Maru Gothic Pro",sans-serif;
+  min-height:100vh;
+  -webkit-tap-highlight-color:transparent;
+}
+h1,h2,h3{margin:0 0 .3em 0; font-weight:900;}
+#app{max-width:760px;margin:0 auto;padding:16px 14px 60px;}
+.title-row{text-align:center;padding-top:6px;}
+.title-row h1{font-size:1.9rem;background:linear-gradient(90deg,var(--pink-deep),var(--purple));-webkit-background-clip:text;background-clip:text;color:transparent;}
+.title-row .sub{color:var(--muted);font-size:.85rem;font-weight:700;}
+.card{background:var(--card);border:2px solid var(--line);border-radius:var(--radius);padding:18px;margin-bottom:14px;box-shadow:var(--shadow);}
+.btn{display:inline-block;background:#fff;color:var(--ink);border:2px solid var(--line);border-radius:999px;padding:12px 20px;font-size:.95rem;font-family:inherit;font-weight:700;cursor:pointer;transition:transform .1s ease;margin:4px 4px 4px 0;}
+.btn:hover{transform:translateY(-2px);}
+.btn:active{transform:scale(.96);}
+.btn.primary{background:linear-gradient(135deg,var(--pink),var(--purple));color:#fff;border-color:transparent;box-shadow:0 6px 14px rgba(255,111,160,.4);}
+.btn.small{padding:7px 14px;font-size:.8rem;}
+.btn.block{display:block;width:100%;text-align:center;margin:8px 0;}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.btn.selected{border-color:var(--pink-deep);box-shadow:0 0 0 2px var(--pink-deep) inset;}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+.grow{flex:1;}
+label{color:var(--muted);font-size:.8rem;font-weight:700;display:block;margin-bottom:4px;}
+input[type=text],input[type=number]{background:#fff;border:2px solid var(--line);color:var(--ink);border-radius:10px;padding:10px 12px;font-size:1rem;font-family:inherit;width:100%;}
+.muted{color:var(--muted);}
+.small{font-size:.8rem;}
+.center{text-align:center;}
+.hidden{display:none !important;}
+
+.status{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;}
+.status .box{background:#fff;border:2px solid var(--line);border-radius:12px;padding:8px 12px;text-align:center;flex:1;min-width:90px;}
+.status .box .lbl{font-size:.65rem;color:var(--muted);font-weight:700;}
+.status .box .val{font-size:1.05rem;font-weight:900;}
+
+.stat-row{display:flex;justify-content:space-between;align-items:center;background:#fff;border:2px solid var(--line);border-radius:12px;padding:10px 14px;margin-bottom:8px;}
+.stat-row .name{font-weight:700;}
+.stat-row .ctrl{display:flex;align-items:center;gap:10px;}
+.stat-row .num{font-size:1.3rem;font-weight:900;width:28px;text-align:center;}
+.roundbtn{width:34px;height:34px;border-radius:50%;border:2px solid var(--line);background:#fff;font-size:1.2rem;font-weight:900;cursor:pointer;}
+.roundbtn:disabled{opacity:.3;cursor:not-allowed;}
+
+.datecard{
+  background:#fff;border-radius:14px;border:2px solid var(--line);
+  padding:12px;width:150px;text-align:center;cursor:pointer;user-select:none;
+  transition:transform .12s ease, box-shadow .12s ease; position:relative; flex-shrink:0;
+}
+.datecard.selected{transform:translateY(-8px);box-shadow:0 10px 18px rgba(255,77,138,.35);border-color:var(--pink-deep);}
+.datecard.taken{opacity:.35;cursor:not-allowed;}
+.datecard .icon{font-size:2rem;}
+.datecard .name{font-weight:800;font-size:.9rem;margin-top:2px;}
+.datecard .stat-badge{display:inline-block;margin-top:6px;padding:3px 8px;border-radius:999px;font-size:.75rem;font-weight:800;color:#fff;}
+.datecard .time-badge{font-size:.7rem;color:var(--muted);margin-top:4px;}
+.datecard .topic{font-size:.68rem;color:var(--muted);margin-top:4px;font-style:normal;}
+.card-wrap{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;padding:6px 0;}
+
+.pill{display:inline-block;background:#fdeaf3;border-radius:999px;padding:4px 12px;font-size:.75rem;font-weight:800;margin:2px;}
+.pill.on{background:linear-gradient(135deg,var(--pink),var(--purple));color:#fff;}
+
+.woman-token{
+  width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-size:1.2rem;background:#fff;border:2px solid var(--line);cursor:pointer;user-select:none;
+}
+.woman-token.placed{background:linear-gradient(135deg,var(--pink),var(--purple));border-color:transparent;}
+.placement-target{
+  background:#fff;border:2px dashed var(--line);border-radius:14px;padding:10px;margin-bottom:8px;min-height:70px;
+}
+.placement-target .ptitle{font-weight:800;font-size:.85rem;margin-bottom:6px;}
+.women-pool{display:flex;gap:8px;flex-wrap:wrap;padding:8px;background:#fbf4ff;border-radius:14px;margin-bottom:12px;}
+
+.result-line{display:flex;align-items:center;gap:10px;background:#fff;border:2px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:8px;}
+.result-line.success{border-color:var(--pink-deep);background:#fff5f9;}
+.result-line .icon{font-size:1.6rem;}
+
+.beauty-card{
+  border-radius:16px;padding:16px;text-align:center;margin-bottom:10px;color:#fff;
+}
+.section-label{font-size:.72rem;color:var(--muted);font-weight:800;margin:14px 0 6px;border-bottom:2px solid var(--line);padding-bottom:4px;}
+.help-toggle{cursor:pointer;color:var(--pink-deep);text-decoration:underline;font-size:.85rem;font-weight:700;}
+#rules-body{margin-top:10px;font-size:.85rem;line-height:1.7;color:var(--muted);}
+.room-code{font-size:2.2rem;letter-spacing:.15em;font-weight:900;text-align:center;margin:6px 0 2px;background:linear-gradient(90deg,var(--pink-deep),var(--purple));-webkit-background-clip:text;background-clip:text;color:transparent;}
+.seat-list{display:flex;flex-direction:column;gap:6px;margin:10px 0;}
+.seat-item{display:flex;justify-content:space-between;align-items:center;background:#fff;border:2px solid var(--line);border-radius:12px;padding:8px 12px;}
+.seat-item.empty{color:var(--muted);font-style:italic;}
+.tag{font-size:.65rem;background:var(--line);border-radius:5px;padding:1px 6px;font-weight:700;}
+table.finaltable{width:100%;border-collapse:collapse;font-size:.85rem;}
+table.finaltable td,table.finaltable th{border-bottom:1px solid var(--line);padding:6px 4px;text-align:center;}
 </style>
 </head>
 <body>
-<div class="app"><div class="top"><div><div class="title">💘 告白タイミング</div><div class="subtitle">デートを選び、会話で運命を動かせ。</div></div><div id="connection" class="small muted"></div></div><main id="root"></main><div class="footer">Firebase Firestoreによるオンライン同期対応</div></div>
+<div id="app">
+  <div class="title-row">
+    <h1>💘 告白タイミング</h1>
+    <div class="sub">心理戦デート争奪ゲーム</div>
+  </div>
+  <div id="root"></div>
+</div>
+
 <script>
-// ============================================================
-// Firebase：既存ゲームのオンライン機能を継承
-// ============================================================
-const firebaseConfig={apiKey:"AIzaSyCHiPbAERMR--X8C_jfu-S9ALETc0DmybU",authDomain:"sea-solt2.firebaseapp.com",projectId:"sea-solt2",storageBucket:"sea-solt2.firebasestorage.app",messagingSenderId:"267993560136",appId:"1:267993560136:web:c1f2a8d75a7b22baf6d47d",measurementId:"G-1MDDE3GN49"};
-let db=null,fbReady=false;try{firebase.initializeApp(firebaseConfig);db=firebase.firestore();fbReady=true}catch(e){console.error(e)}
-const ROOM_COLLECTION='confession_timing_rooms';
-const App={uid:'u_'+Math.random().toString(36).slice(2,10),name:'',roomCode:null,seat:-1,unsub:null,doc:null,local:null};
-const root=document.getElementById('root');
-const STAT={affection:{label:'💗 好感度',short:'好感度'},tension:{label:'😳 緊張度',short:'緊張度'},expense:{label:'💰 出費',short:'出費'},romantic:{label:'🌙 ロマンチック度',short:'ロマンチック度'}};
-const TIMES=[['☀️','昼'],['🌆','夕方'],['🌙','夜']];
-const PLACES=[
- ['☕','カフェ'],['🎬','映画館'],['🎢','遊園地'],['🐠','水族館'],['🌃','展望台'],['🍽️','高級レストラン'],['🛍️','ショッピング'],['🌳','公園'],['🎤','カラオケ'],['🎨','美術館'],['🏖️','海'],['🦁','動物園'],['🎳','ボウリング'],['🕹️','ゲームセンター'],['♨️','温泉'],['⛩️','神社'],['🔭','プラネタリウム'],['🚗','ドライブ'],['🌆','夜の街'],['🏨','ホテルラウンジ'],['🍰','スイーツ店'],['🎡','観覧車'],['🌹','庭園'],['📚','本屋']
+/* =====================================================================
+   1. データ定義
+   ===================================================================== */
+const STATUS_IDS = ['affection','tension','expense','romantic'];
+const STATUS_META = {
+  affection:{label:'好感度', emoji:'💗', color:'var(--pink-deep)'},
+  tension:{label:'緊張度', emoji:'😳', color:'var(--yellow)'},
+  expense:{label:'出費', emoji:'💰', color:'var(--green)'},
+  romantic:{label:'ロマンチック度', emoji:'🌙', color:'var(--purple)'},
+};
+const TIME_META = {
+  day:{label:'昼', emoji:'☀️'},
+  evening:{label:'夕方', emoji:'🌆'},
+  night:{label:'夜', emoji:'🌙'},
+};
+const LOCATIONS = [
+  {name:'カフェ', icon:'☕'}, {name:'映画館', icon:'🎬'}, {name:'遊園地', icon:'🎡'},
+  {name:'水族館', icon:'🐠'}, {name:'展望台', icon:'🌃'}, {name:'高級レストラン', icon:'🍽️'},
+  {name:'ショッピング', icon:'🛍️'}, {name:'公園', icon:'🌳'}, {name:'カラオケ', icon:'🎤'},
+  {name:'美術館', icon:'🖼️'}, {name:'海', icon:'🌊'}, {name:'動物園', icon:'🦁'},
+  {name:'ボウリング', icon:'🎳'}, {name:'ゲームセンター', icon:'🕹️'}, {name:'温泉', icon:'♨️'},
+  {name:'神社', icon:'⛩️'}, {name:'プラネタリウム', icon:'🔭'}, {name:'ドライブ', icon:'🚗'},
+  {name:'夜の街', icon:'🌆'}, {name:'ホテルラウンジ', icon:'🛋️'},
 ];
-const TOPICS=['好きな食べ物','最近観た映画','音楽','旅行','動物','仕事','学生時代','趣味','休日の過ごし方','恋愛観','子どもの頃','最近ハマっていること','行ってみたい場所','好きな季節','理想のデート','秘密','苦手なこと','最近あった面白い話','朝型？夜型？','もし1週間休みがあったら？'];
-const BEAUTIES=[{id:'affection',name:'💗 好感度の爆美女',desc:'一緒にいると自然と惹かれるタイプ'},{id:'tension',name:'😳 緊張度の爆美女',desc:'ドキドキさせられる相手に弱いタイプ'},{id:'expense',name:'💰 出費の爆美女',desc:'最高のデートをしてくれる相手に弱いタイプ'},{id:'romantic',name:'🌙 ロマンチック度の爆美女',desc:'雰囲気とムードを大切にするタイプ'}];
-function el(h){const t=document.createElement('template');t.innerHTML=h.trim();return t.content.firstElementChild}
-function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-function shuffle(a){a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
-function rnd(a){return a[Math.floor(Math.random()*a.length)]}
-function code(){return Array.from({length:5},()=>rnd('ABCDEFGHJKLMNPQRSTUVWXYZ23456789'.split(''))).join('')}
-function emptyStats(){return {affection:0,tension:0,expense:0,romantic:0}}
-function makeCards(n=5){return shuffle(PLACES).slice(0,n).map((p,i)=>{const st=rnd(Object.keys(STAT));const tm=rnd(TIMES);return{id:'d_'+Date.now().toString(36)+'_'+i+'_'+Math.random().toString(36).slice(2,6),place:p[1],icon:p[0],status:st,value:1+Math.floor(Math.random()*3),time:tm[1],timeIcon:tm[0],topic:rnd(TOPICS)}})}
-function initialState(names,totalRounds=8){return{players:names.map((name,i)=>({id:i,name,stats:emptyStats(),initialStats:emptyStats(),score:0,beauties:[],selectedCard:null})),totalRounds,round:1,parent:0,phase:'initial_setup',fieldCards:[],selected:{},assignments:{},assignmentDone:{},logs:['ゲーム開始'],beauties:BEAUTIES,result:null}}
-function log(s,x){s.logs=(s.logs||[]).concat(x).slice(-80)}
-function addStats(p,st,v){p.stats[st]+=v}
-function newRound(s){s.fieldCards=makeCards();s.selected={};s.assignments={};s.assignmentDone={};s.players.forEach(p=>p.selectedCard=null);s.phase='parent_select';log(s,`第${s.round}ラウンド開始。`);return s}
-function allSelected(s){return s.players.every(p=>s.selected[p.id]!=null)}
-function usedIds(s){return Object.values(s.selected).filter(Boolean)}
-function applyRoundResult(s){
- const counts={};s.fieldCards.forEach(c=>counts[c.id]=0);Object.values(s.assignments).forEach(cid=>{if(counts[cid]!=null)counts[cid]++});
- const parentCardId=s.selected[s.parent];const parentCard=s.fieldCards.find(c=>c.id===parentCardId);
- s.players.forEach(p=>{
-   const cid=s.selected[p.id];const c=s.fieldCards.find(x=>x.id===cid);if(!c)return;
-   const women=counts[c.id]||0;
-   // 親：親＋女性1人だけなら2倍
-   if(p.id===s.parent && women===1){addStats(p,c.status,c.value*2);log(s,`${p.name}が${c.place}で2人きり。${STAT[c.status].short}+${c.value*2}`)}
-   // 子：子＋女性1人だけなら1倍。親が選んだカードでも、親以外の子がそのカードを選べないためここには来ない。
-   else if(p.id!==s.parent && women===1){addStats(p,c.status,c.value);log(s,`${p.name}が${c.place}で2人きり。${STAT[c.status].short}+${c.value}`)}
-   else log(s,`${p.name}の${c.place}は2人きり成立せず。`);
- });
- if(s.round>=s.totalRounds){s.phase='confession';log(s,'最終ラウンド終了。告白タイムへ。');return s}
- s.round++;s.parent=(s.parent+1)%s.players.length;return newRound(s)
+const TOPICS = ['好きな食べ物','好きな映画','音楽','旅行','動物','仕事','学校','趣味','休日','恋愛','子どもの頃','最近ハマっていること','行ってみたい場所','好きな季節','理想のデート','秘密','苦手なこと','最近あった面白い話'];
+
+let _idc = 0;
+function nid(p){ return p+'_'+(_idc++); }
+function shuffle(arr){ const a=arr.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+function clone(s){ return JSON.parse(JSON.stringify(s)); }
+function pushLog(s,m){ s.log.push(m); if(s.log.length>400) s.log.shift(); }
+
+function buildLocationDeck(){
+  const deck=[];
+  LOCATIONS.forEach(loc=>{ for(let i=0;i<3;i++) deck.push({locName:loc.name, locIcon:loc.icon}); });
+  return shuffle(deck);
 }
-function setInitial(s,pid,stats){if(Object.values(stats).reduce((a,b)=>a+b,0)!==4)return s;s.players[pid].initialStats={...stats};s.players[pid].stats={...stats};return s}
+function generateCard(loc){
+  const status = STATUS_IDS[Math.floor(Math.random()*4)];
+  const value = 1+Math.floor(Math.random()*3);
+  const times = Object.keys(TIME_META);
+  const time = times[Math.floor(Math.random()*3)];
+  const topic = TOPICS[Math.floor(Math.random()*TOPICS.length)];
+  return {id:nid('card'), name:loc.locName, icon:loc.locIcon, status, value, time, topic};
+}
 
-// ============================================================
-// ルーム作成・参加・同期：既存コードと同じFirestore方式
-// ============================================================
-function subscribe(codeValue){if(App.unsub)App.unsub();const ref=db.collection(ROOM_COLLECTION).doc(codeValue);App.unsub=ref.onSnapshot(snap=>{if(!snap.exists){showError('ルームが存在しません。');return}App.doc=snap.data();App.seat=(App.doc.seats||[]).findIndex(x=>x&&x.uid===App.uid);renderOnline();},e=>{console.error(e);showError('通信エラー：'+e.message)})}
-async function createRoom(){App.name=(document.getElementById('name')?.value||'あなた').trim()||'あなた';let c;for(let i=0;i<8;i++){const x=code();const ref=db.collection(ROOM_COLLECTION).doc(x);try{await db.runTransaction(async tx=>{if((await tx.get(ref)).exists)throw Error('exists');tx.set(ref,{status:'waiting',createdAt:firebase.firestore.FieldValue.serverTimestamp(),seats:[{uid:App.uid,name:App.name},null,null,null,null,null],settings:{rounds:8},game:null})});c=x;break}catch(e){if(e.message!=='exists')throw e}}if(!c)throw Error('ルームコードを作成できませんでした');App.roomCode=c;subscribe(c)}
-async function joinRoom(c){App.name=(document.getElementById('name')?.value||'あなた').trim()||'あなた';c=c.trim().toUpperCase();const ref=db.collection(ROOM_COLLECTION).doc(c);await db.runTransaction(async tx=>{const snap=await tx.get(ref);if(!snap.exists)throw Error('ルームが見つかりません');const d=snap.data();if(d.status!=='waiting')throw Error('ゲームはすでに開始されています');const seats=(d.seats||[]).slice();if(seats.some(x=>x&&x.uid===App.uid)){}else{const i=seats.findIndex(x=>!x);if(i<0)throw Error('満席です');seats[i]={uid:App.uid,name:App.name}}tx.update(ref,{seats})});App.roomCode=c;subscribe(c)}
-async function txGame(mutator){const ref=db.collection(ROOM_COLLECTION).doc(App.roomCode);await db.runTransaction(async tx=>{const snap=await tx.get(ref);const d=snap.data();if(d.status!=='playing')return;const before=JSON.parse(JSON.stringify(d.game));const after=mutator(before);tx.update(ref,{game:after})})}
-async function startGame(){const ref=db.collection(ROOM_COLLECTION).doc(App.roomCode);await db.runTransaction(async tx=>{const snap=await tx.get(ref),d=snap.data();if(d.status!=='waiting')return;if(d.seats.filter(Boolean).length<2)throw Error('2人以上必要です');const names=d.seats.filter(Boolean).map(x=>x.name);let s=initialState(names,8);s.phase='initial_setup';tx.update(ref,{status:'playing',game:s})})}
-function disconnect(){if(App.unsub){App.unsub();App.unsub=null}App.doc=null;App.roomCode=null;App.seat=-1}
+/* =====================================================================
+   2. ゲームエンジン（純関数）
+   ===================================================================== */
+const Game3 = {};
+Game3.newGame = function(names, totalRounds){
+  totalRounds = totalRounds || 8;
+  const players = names.map((name,i)=>({
+    id:i, name,
+    stats:{affection:0,tension:0,expense:0,romantic:0},
+    initialStats:null,
+    history:{affection:[],tension:[],expense:[],romantic:[]},
+    beautyGirls:[], score:0,
+  }));
+  return {
+    players, currentRound:1, totalRounds,
+    parentIndex:0,
+    deck: buildLocationDeck(), discardPile:[],
+    fieldCards: [], selections:{}, parentCardId:null,
+    childTurnOrder:[], childTurnPointer:0,
+    womenCount: names.length, womenPlacements:{},
+    pendingInitialStats:{},
+    lastRoundResults: [],
+    phase:'initial_stats',
+    confession:null,
+    log:['ゲーム開始：まずは初期ステータスを振り分けてください'],
+  };
+};
+Game3.setInitialStats = function(stateIn, playerId, statsObj){
+  const state = clone(stateIn);
+  if(state.phase!=='initial_stats') return state;
+  if(state.pendingInitialStats[playerId]) return state;
+  const sum = STATUS_IDS.reduce((a,k)=>a+(statsObj[k]||0),0);
+  if(sum!==4) return state;
+  for(const k of STATUS_IDS){ if(!Number.isInteger(statsObj[k]) || statsObj[k]<0) return state; }
+  state.players[playerId].stats = {...statsObj};
+  state.players[playerId].initialStats = {...statsObj};
+  state.pendingInitialStats[playerId] = true;
+  pushLog(state, `${state.players[playerId].name} の初期ステータスが決定`);
+  if(state.players.every(p=>state.pendingInitialStats[p.id])) return startRound(state);
+  return state;
+};
+function drawFieldCards(state){
+  const n = Math.max(5, state.players.length);
+  const drawn = [];
+  for(let i=0;i<n;i++){
+    if(state.deck.length===0){
+      if(state.discardPile.length===0) break;
+      state.deck = shuffle(state.discardPile);
+      state.discardPile = [];
+      pushLog(state, '山札が尽きたため、捨て札をシャッフルして再利用します');
+    }
+    const loc = state.deck.pop();
+    state.discardPile.push(loc);
+    drawn.push(generateCard(loc));
+  }
+  return drawn;
+}
+function startRound(state){
+  state.fieldCards = drawFieldCards(state);
+  state.selections = {};
+  state.parentCardId = null;
+  state.childTurnOrder = [];
+  state.childTurnPointer = 0;
+  state.womenPlacements = {};
+  state.phase = 'parent_pick';
+  pushLog(state, `第${state.currentRound}ラウンド開始（親: ${state.players[state.parentIndex].name}）`);
+  return state;
+}
+Game3.parentPick = function(stateIn, cardId){
+  const state = clone(stateIn);
+  if(state.phase!=='parent_pick') return state;
+  const card = state.fieldCards.find(c=>c.id===cardId);
+  if(!card) return state;
+  state.parentCardId = cardId;
+  const n = state.players.length;
+  const order = [];
+  for(let i=1;i<n;i++) order.push((state.parentIndex+i)%n);
+  state.childTurnOrder = order;
+  state.childTurnPointer = 0;
+  state.phase = 'child_pick';
+  pushLog(state, `${state.players[state.parentIndex].name}（親）が ${card.icon}${card.name} を選択`);
+  return state;
+};
+Game3.childPick = function(stateIn, playerId, cardId){
+  const state = clone(stateIn);
+  if(state.phase!=='child_pick') return state;
+  const expected = state.childTurnOrder[state.childTurnPointer];
+  if(expected!==playerId) return state;
+  if(cardId===state.parentCardId) return state;
+  if(Object.values(state.selections).includes(cardId)) return state;
+  const card = state.fieldCards.find(c=>c.id===cardId);
+  if(!card) return state;
+  state.selections[playerId] = cardId;
+  pushLog(state, `${state.players[playerId].name} が ${card.icon}${card.name} を選択`);
+  state.childTurnPointer += 1;
+  if(state.childTurnPointer >= state.childTurnOrder.length) state.phase = 'conversation';
+  return state;
+};
+Game3.finishConversation = function(stateIn){
+  const state = clone(stateIn);
+  if(state.phase!=='conversation') return state;
+  state.phase = 'women_placement';
+  const wp = {};
+  for(let i=0;i<state.womenCount;i++) wp[i]=null;
+  state.womenPlacements = wp;
+  return state;
+};
+Game3.placeWoman = function(stateIn, womanIndex, cardId){
+  const state = clone(stateIn);
+  if(state.phase!=='women_placement') return state;
+  if(!(womanIndex in state.womenPlacements)) return state;
+  const validTargets = [state.parentCardId, ...Object.values(state.selections)];
+  if(cardId!==null && !validTargets.includes(cardId)) return state;
+  state.womenPlacements[womanIndex] = cardId;
+  return state;
+};
+Game3.confirmPlacement = function(stateIn){
+  const state = clone(stateIn);
+  if(state.phase!=='women_placement') return state;
+  if(Object.values(state.womenPlacements).some(v=>v===null)) return state;
+  const entries = [{playerId: state.parentIndex, cardId: state.parentCardId, isParent:true}];
+  for(const [pid, cid] of Object.entries(state.selections)) entries.push({playerId:+pid, cardId:cid, isParent:false});
+  const roundResults = [];
+  entries.forEach(entry=>{
+    const womenHere = Object.values(state.womenPlacements).filter(c=>c===entry.cardId).length;
+    const card = state.fieldCards.find(c=>c.id===entry.cardId);
+    const success = womenHere===1;
+    let awarded = 0;
+    if(success){
+      awarded = card.value * (entry.isParent?2:1);
+      state.players[entry.playerId].stats[card.status] += awarded;
+      state.players[entry.playerId].history[card.status].push({round:state.currentRound, cardValue:card.value, wasParent:entry.isParent, awarded});
+    }
+    roundResults.push({playerId:entry.playerId, isParent:entry.isParent, card, womenHere, success, awarded});
+  });
+  state.lastRoundResults = roundResults;
+  state.phase = 'results';
+  pushLog(state, `第${state.currentRound}ラウンド結果確定`);
+  return state;
+};
+Game3.nextRound = function(stateIn){
+  const state = clone(stateIn);
+  if(state.phase!=='results') return state;
+  if(state.currentRound>=state.totalRounds) return computeConfession(state);
+  state.currentRound += 1;
+  state.parentIndex = (state.parentIndex+1) % state.players.length;
+  return startRound(state);
+};
+function computeConfession(state){
+  const results = {};
+  STATUS_IDS.forEach(stat=>{
+    const maxVal = Math.max(...state.players.map(p=>p.stats[stat]));
+    let candidates = state.players.filter(p=>p.stats[stat]===maxVal);
+    let reason = '唯一の最高値';
+    if(candidates.length>1){
+      const c1 = candidates.map(p=>({p, v:p.history[stat].length}));
+      const m1 = Math.max(...c1.map(x=>x.v));
+      candidates = c1.filter(x=>x.v===m1).map(x=>x.p);
+      reason = `獲得回数(${m1}回)で優先`;
+      if(candidates.length>1){
+        const c2 = candidates.map(p=>({p, v:p.history[stat].filter(h=>h.cardValue>=2).length}));
+        const m2 = Math.max(...c2.map(x=>x.v));
+        candidates = c2.filter(x=>x.v===m2).map(x=>x.p);
+        reason = `+2/+3カード獲得回数(${m2}回)で優先`;
+        if(candidates.length>1){
+          const c3 = candidates.map(p=>({p, v:p.history[stat].filter(h=>h.wasParent).length}));
+          const m3 = Math.max(...c3.map(x=>x.v));
+          candidates = c3.filter(x=>x.v===m3).map(x=>x.p);
+          reason = `親2倍獲得回数(${m3}回)で優先`;
+          if(candidates.length>1){ candidates=[candidates[Math.floor(Math.random()*candidates.length)]]; reason='ランダム決定'; }
+        }
+      }
+    }
+    results[stat] = {winnerId: candidates[0].id, value:maxVal, reason};
+  });
+  STATUS_IDS.forEach(stat=>{
+    const winner = state.players.find(p=>p.id===results[stat].winnerId);
+    winner.beautyGirls.push(stat);
+    winner.score += 1;
+  });
+  state.confession = results;
+  state.phase = 'final';
+  pushLog(state, '告白タイム：爆美女が決定しました');
+  return state;
+}
 
-// ============================================================
-// 画面
-// ============================================================
-function renderStart(){root.innerHTML=`<div class="card center"><div class="big">💘</div><h1>告白タイミング</h1><p class="muted">デート場所を選び、会話で1人を呼び込み、最後に爆美女を仕留める心理戦。</p><div class="grid" style="margin-top:18px"><button class="btn primary block" id="online">オンライン対戦</button><button class="btn block" id="local">同じ端末で遊ぶ</button><button class="btn block" id="rules">ルールを見る</button><button class="btn block" id="reset">画面を更新</button></div><div id="rulebox" class="notice hidden" style="margin-top:14px;text-align:left"><b>基本ルール</b><br>4つのステータスは 💗好感度 / 😳緊張度 / 💰出費 / 🌙ロマンチック度。開始時に4ポイントを自由配分。毎ラウンド5枚のデートカードから親が1枚、子が順番に1枚選ぶ。会話後、女性を配置し、親＋女性1人ならカード値×2、子＋女性1人なら×1。ゲーム中の他人のステータスは非公開。最終告白タイムで公開し、4種類の爆美女を各ステータス1位が獲得。1人1点。</div></div>`;document.getElementById('online').onclick=renderEntry;document.getElementById('local').onclick=renderLocalSetup;document.getElementById('rules').onclick=()=>document.getElementById('rulebox').classList.toggle('hidden');document.getElementById('reset').onclick=()=>location.reload()}
-function renderEntry(){root.innerHTML=`<div class="card"><h2>オンライン対戦</h2><label>プレイヤー名</label><input id="name" maxlength="12" placeholder="あなた"><div class="row" style="margin-top:14px"><button class="btn primary grow" id="create">ルームを作成</button></div><div class="section-label" style="margin:18px 0 6px">ルームに参加</div><div class="row"><input id="code" maxlength="5" placeholder="5文字のルームコード"><button class="btn ok" id="join">参加</button></div><div id="err" class="error"></div><button class="btn block" id="back" style="margin-top:14px">戻る</button></div>`;document.getElementById('back').onclick=renderStart;document.getElementById('create').onclick=async()=>{try{await createRoom()}catch(e){document.getElementById('err').textContent=e.message}};document.getElementById('join').onclick=async()=>{try{App.name=(document.getElementById('name').value||'あなた').trim()||'あなた';await joinRoom(document.getElementById('code').value)}catch(e){document.getElementById('err').textContent=e.message}}}
-function renderLobby(){const d=App.doc,filled=d.seats.filter(Boolean).length,host=d.seats[0]?.uid===App.uid;root.innerHTML=`<div class="card center"><h2>ルーム待機中</h2><div class="room">${App.roomCode}</div><p class="muted">このコードを友達に共有してください。</p><div class="seats">${d.seats.map((s,i)=>`<div class="seat ${s?.uid===App.uid?'me':''}">${s?esc(s.name)+(s.uid===App.uid?'（あなた）':''):'空席'}<br><span class="muted small">席${i+1}</span></div>`).join('')}</div><div class="notice" style="margin-top:14px">${filled}/6人参加</div>${host?`<button class="btn primary block" id="start" style="margin-top:14px" ${filled<2?'disabled':''}>ゲーム開始</button>`:`<p class="muted">ホストがゲームを開始するまでお待ちください。</p>`}<button class="btn block" id="leave" style="margin-top:8px">退出</button></div>`;if(host)document.getElementById('start').onclick=async()=>{try{await startGame()}catch(e){alert(e.message)}};document.getElementById('leave').onclick=()=>{disconnect();renderStart()}}
-function statusOwn(p){return `<div class="stats">${Object.entries(STAT).map(([k,v])=>`<div class="stat"><span>${v.label}</span><b>${p.stats[k]}</b></div>`).join('')}</div>`}
-function renderInitial(s,online=true){const p=s.players[App.seat>=0?App.seat:0];if(!p)return;const sum=Object.values(p.initialStats).reduce((a,b)=>a+b,0);root.innerHTML=`<div class="card"><div class="phase">ゲーム準備</div><h2>初期ステータスを振り分け</h2><p class="muted">4ポイントを4つの告白スキルに自由に配分してください。0ポイントも可能。数字は他プレイヤーには非公開です。</p><div id="alloc"></div><div class="notice" style="margin-top:12px">残りポイント：<b id="remain">${4-sum}</b></div><button class="btn primary block" id="confirm" ${sum!==4?'disabled':''} style="margin-top:12px">この配分で確定</button><p class="small muted center" style="margin-top:10px">全員の確定を待っています…</p></div>`;const box=document.getElementById('alloc');Object.entries(STAT).forEach(([k,v])=>{const r=el(`<div class="row" style="justify-content:space-between;margin:9px 0"><b>${v.label}</b><div class="row"><button class="btn" data-minus="${k}">−</button><b style="width:30px;text-align:center" id="n-${k}">${p.initialStats[k]}</b><button class="btn" data-plus="${k}">＋</button></div></div>`);box.appendChild(r)});function rerender(){const q=s.players[App.seat>=0?App.seat:0].initialStats;const n=Object.values(q).reduce((a,b)=>a+b,0);document.getElementById('remain').textContent=4-n;document.getElementById('confirm').disabled=n!==4;Object.keys(q).forEach(k=>document.getElementById('n-'+k).textContent=q[k])}box.querySelectorAll('[data-plus]').forEach(b=>b.onclick=async()=>{const k=b.dataset.plus;const q=s.players[App.seat].initialStats;const n=Object.values(q).reduce((a,x)=>a+x,0);if(n<4){q[k]++;await syncSetInitial(q);rerender()}});box.querySelectorAll('[data-minus]').forEach(b=>b.onclick=async()=>{const k=b.dataset.minus;const q=s.players[App.seat].initialStats;if(q[k]>0){q[k]--;await syncSetInitial(q);rerender()}});document.getElementById('confirm').onclick=async()=>{await txGame(x=>{x.players[App.seat].initialConfirmed=true;x.players[App.seat].initialStats={...x.players[App.seat].initialStats};x.players[App.seat].stats={...x.players[App.seat].initialStats};if(x.players.every(p=>p.initialConfirmed)){x.round=1;x.parent=0;x.phase='parent_select';x.fieldCards=makeCards();x.logs=['全員の初期ステータス確定。第1ラウンド開始。']}return x})}}
-async function syncSetInitial(q){await txGame(x=>{x.players[App.seat].initialStats={...q};return x})}
-function cardHtml(c,selected=false,disabled=false){return `<div class="date ${selected?'selected':''} ${disabled?'used':''}" data-card="${c.id}"><div class="icon">${c.icon}</div><div class="name">${esc(c.place)}</div><span class="pill">${STAT[c.status].label}</span><span class="pill">${c.timeIcon}${c.time}</span><div class="value">+${c.value}</div><div class="topic">💬 ${esc(c.topic)}</div></div>`}
-function renderField(s,mode='online'){const me=App.seat>=0?s.players[App.seat]:s.players[0];let selected=mode==='local'?s.selected[App.localSeat]:s.selected[App.seat];const parent=s.parent;root.innerHTML=`<div class="card"><div class="row" style="justify-content:space-between"><div><span class="phase">第${s.round}/${s.totalRounds}ラウンド</span><h2 style="margin:9px 0">${s.players[parent].name} が親</h2></div><div style="min-width:260px">${statusOwn(me)}</div></div></div><div class="card"><div class="row" style="justify-content:space-between"><h2 style="margin:0">デート候補5枚</h2><span class="muted small">${s.phase==='parent_select'?'親が1枚選択':'子が順番に選択'}</span></div><div class="cards" style="margin-top:12px">${s.fieldCards.map(c=>cardHtml(c,selected===c.id,usedIds(s).includes(c.id))).join('')}</div><div id="hint" class="notice" style="margin-top:12px">${s.phase==='parent_select'?'親：自分が欲しいステータスのカードを選んでください。':'子：残っているカードから1枚選んでください。'}</div></div><div class="card"><h3>現在の選択状況</h3><div class="seats">${s.players.map(p=>`<div class="seat">${esc(p.name)}<br><span class="muted">${s.selected[p.id]?'選択済み':'選択待ち'}</span></div>`).join('')}</div></div><div class="card"><h3>ログ</h3><div class="log">${(s.logs||[]).slice(-10).map(x=>`・${esc(x)}`).join('<br>')}</div></div>`;root.querySelectorAll('[data-card]').forEach(node=>node.onclick=async()=>{const cid=node.dataset.card;if(usedIds(s).includes(cid))return;if(s.phase==='parent_select'&&App.seat!==parent)return;if(s.phase==='child_select'&&App.seat===parent)return;if(s.phase==='child_select'){const next=s.players.find(p=>p.id!==parent&&!s.selected[p.id]);if(!next||next.id!==App.seat)return}await txGame(x=>{x.selected[App.seat]=cid;if(x.phase==='parent_select'){x.players[App.seat].selectedCard=cid;x.phase='child_select'}else{x.players[App.seat].selectedCard=cid;if(Object.keys(x.selected).length===x.players.length){x.phase='conversation';x.logs.push('全員のデート場所が決定。会話タイムへ。')}}return x})})}
-function renderConversation(s){root.innerHTML=`<div class="card center"><div class="phase">会話タイム</div><h2>💬 会話で1人だけ呼び込め</h2><p class="muted">各プレイヤーは自分の選んだデート場所と「会話のタネ」を確認。現実の会話で、どの女性がどこへ行くかを駆け引きしてください。</p><div class="notice" style="margin-top:14px">オンラインの場合はボイスチャット等を使って自由に会話してください。女性ごとの「来やすい場所」は存在しません。</div><div class="grid" style="margin-top:14px">${s.players.map(p=>{const c=s.fieldCards.find(x=>x.id===s.selected[p.id]);return `<div class="notice"><b>${esc(p.name)}</b><br>${c.icon} ${esc(c.place)}<br><span class="pill">${STAT[c.status].label} +${c.value}</span><span class="pill">${c.timeIcon}${c.time}</span><p class="small">💬 ${esc(c.topic)}</p></div>`}).join('')}</div><button class="btn primary block" id="next" style="margin-top:16px">会話終了・女性を配置する</button></div>`;document.getElementById('next').onclick=async()=>txGame(x=>{x.phase='assignment';x.assignments={};x.assignmentDone={};x.logs.push('会話終了。女性の配置へ。');return x})}
-function renderAssignment(s){const me=App.seat>=0?s.players[App.seat]:s.players[0];const selected=s.selected[me.id];const cards=s.fieldCards.filter(c=>usedIds(s).includes(c.id));const done=!!s.assignmentDone[me.id];root.innerHTML=`<div class="card"><div class="phase">女性配置</div><h2>あなたのデートに来る女性を決める</h2><p class="muted">会話で決まった結果を、各プレイヤーが1人ずつ配置します。女性は1人につき1つのデート場所へ。</p><div class="women">${cards.map(c=>`<div class="woman ${s.assignments[me.id]===c.id?'selected':''}" data-cid="${c.id}"><div style="font-size:28px">${c.icon}</div><b>${esc(c.place)}</b><div class="small muted">${STAT[c.status].label} +${c.value} / ${c.timeIcon}${c.time}</div></div>`).join('')}</div><button class="btn primary block" id="done" ${done||!s.assignments[me.id]?'disabled':''} style="margin-top:14px">この女性配置を確定</button><div class="notice" style="margin-top:10px">確定済み：${Object.keys(s.assignmentDone).length}/${s.players.length}</div></div>`;root.querySelectorAll('[data-cid]').forEach(n=>n.onclick=async()=>{if(done)return;await txGame(x=>{x.assignments[me.id]=n.dataset.cid;return x})});document.getElementById('done').onclick=async()=>txGame(x=>{x.assignmentDone[me.id]=true;if(Object.keys(x.assignmentDone).length===x.players.length)x.phase='round_result';return x})}
-function renderRoundResult(s){const counts={};s.fieldCards.forEach(c=>counts[c.id]=0);Object.values(s.assignments).forEach(cid=>counts[cid]=(counts[cid]||0)+1);root.innerHTML=`<div class="card"><div class="phase">デート結果</div><h2>💞 誰と2人きりになった？</h2><div class="grid">${s.players.map(p=>{const c=s.fieldCards.find(x=>x.id===s.selected[p.id]);const n=counts[c.id]||0;const good=n===1;const mult=p.id===s.parent?2:1;return `<div class="notice"><b>${esc(p.name)}</b><br>${c.icon} ${esc(c.place)}<br>${n===1?'👩 女性1人・2人きり！':`👥 女性${n}人 → 2人きり失敗`}<br>${good?`<strong style="color:var(--gold)">${STAT[c.status].label} +${c.value*mult}</strong>`:'<span class="muted">獲得なし</span>'}</div>`}).join('')}</div><button class="btn primary block" id="next" style="margin-top:14px">次へ</button></div>`;document.getElementById('next').onclick=async()=>txGame(x=>{applyRoundResult(x);return x})}
-function renderConfession(s){const sorted={};Object.keys(STAT).forEach(k=>sorted[k]=[...s.players].sort((a,b)=>b.stats[k]-a.stats[k]));const winners={};Object.keys(STAT).forEach(k=>{const top=sorted[k][0].stats[k];winners[k]=sorted[k].filter(p=>p.stats[k]===top).map(p=>p.id)});root.innerHTML=`<div class="card"><div class="phase">最終ラウンド</div><h1>👑 告白タイム</h1><p class="muted">ここで初めて、全員のステータスが公開されます。</p><div class="grid" style="margin-top:14px">${s.players.map(p=>`<div class="notice"><b>${esc(p.name)}</b>${statusOwn(p)}</div>`).join('')}</div></div><div class="card"><h2>💘 爆美女への告白</h2><div class="beauty">${BEAUTIES.map(b=>{const ws=winners[b.id].map(id=>s.players[id]);const winner=ws.length===1?ws[0]:null;return `<div class="card ${winner?'win':''}"><div style="font-size:34px">👸</div><h3>${b.name}</h3><p class="small muted">${b.desc}</p><div>${ws.map(p=>`<b>${esc(p.name)}</b>`).join('・')}</div>${winner?`<p style="color:var(--gold);font-weight:900">告白OK！＋1点</p>`:`<p class="small">同率のためタイブレークが必要</p>`}</div>`}).join('')}</div><button class="btn primary block" id="finish" style="margin-top:16px">最終結果を確定</button></div>`;document.getElementById('finish').onclick=async()=>txGame(x=>{for(const b of BEAUTIES){const vals=x.players.map(p=>p.stats[b.id]);const max=Math.max(...vals);const ids=x.players.map((p,i)=>vals[i]===max?i:-1).filter(i=>i>=0);let winner=ids[0];if(ids.length>1){const scores=ids.map(i=>{const h=x.players[i].history?.[b.id]||[];return [h.filter(v=>v===b.id).length,h.reduce((a,v)=>a+v,0)]});winner=ids.sort((a,c)=>{const A=x.players[a].tie?.[b.id]||0,C=x.players[c].tie?.[b.id]||0;return C-A})[0]}x.players[winner].score++;x.players[winner].beauties.push(b.id)}x.phase='gameover';return x})}
-function renderGameover(s){const ranking=[...s.players].sort((a,b)=>b.score-a.score);root.innerHTML=`<div class="card center"><div class="big">🏆</div><h1>告白結果</h1><p class="muted">最も多くの爆美女を仕留めたのは……</p><div class="big" style="color:var(--gold)">${esc(ranking[0].name)}</div><p>${ranking[0].score}点</p></div><div class="card"><h2>最終ランキング</h2>${ranking.map((p,i)=>`<div class="notice" style="margin:8px 0"><div class="row" style="justify-content:space-between"><span class="rank">${i+1}位　${esc(p.name)}</span><b>${p.score}点</b></div><div class="small muted">${p.beauties.map(id=>BEAUTIES.find(b=>b.id===id)?.name||'').join(' / ')||'爆美女なし'}</div>${statusOwn(p)}</div>`).join('')}</div><button class="btn primary block" id="again">もう一度</button><button class="btn block" id="title" style="margin-top:8px">タイトルへ</button>`;document.getElementById('again').onclick=async()=>{await txGame(x=>{const names=x.players.map(p=>p.name);let n=initialState(names,x.totalRounds);n.phase='initial_setup';return n})};document.getElementById('title').onclick=()=>{disconnect();renderStart()}}
-function renderOnline(){if(!App.doc){return}document.getElementById('connection').textContent=App.roomCode?'● ONLINE / '+App.roomCode:'';if(App.doc.status==='waiting')return renderLobby();const s=App.doc.game;if(!s)return; if(s.phase==='initial_setup')return renderInitial(s);if(s.phase==='parent_select'||s.phase==='child_select')return renderField(s);if(s.phase==='conversation')return renderConversation(s);if(s.phase==='assignment')return renderAssignment(s);if(s.phase==='round_result')return renderRoundResult(s);if(s.phase==='confession')return renderConfession(s);if(s.phase==='gameover')return renderGameover(s)}
-function showError(msg){root.innerHTML=`<div class="card center"><h2>エラー</h2><p>${esc(msg)}</p><button class="btn" id="b">タイトルへ</button></div>`;document.getElementById('b').onclick=()=>{disconnect();renderStart()}}
+/* =====================================================================
+   3. Firebase 初期化（オンライン対戦用）
+   ===================================================================== */
+const firebaseConfig = {
+  apiKey: "AIzaSyCHiPbAERMR--X8C_jfu-S9ALETc0DmybU",
+  authDomain: "sea-solt2.firebaseapp.com",
+  projectId: "sea-solt2",
+  storageBucket: "sea-solt2.firebasestorage.app",
+  messagingSenderId: "267993560136",
+  appId: "1:267993560136:web:c1f2a8d75a7b22baf6d47d",
+  measurementId: "G-1MDDE3GN49"
+};
+let fbReady=false, db=null;
+try{
+  if(firebaseConfig.apiKey && firebaseConfig.apiKey!=="YOUR_API_KEY"){
+    firebase.initializeApp(firebaseConfig);
+    db = firebase.firestore();
+    fbReady = true;
+  }
+}catch(e){ console.error('Firebase init failed', e); }
+const ROOM_COLLECTION = 'rooms'; // 他ゲームと同じ rooms コレクションを共用
 
-// ============================================================
-// 同じ端末用：オンラインと同じゲームエンジンを利用
-// ============================================================
-let localNames=[],localState=null;
-function renderLocalSetup(){root.innerHTML=`<div class="card"><h2>同じ端末で遊ぶ</h2><p class="muted">2～6人。端末を順番に渡してプレイします。</p><label>人数</label><select id="num" style="width:100%;background:#0f1220;color:white;border:1px solid var(--line);padding:11px;border-radius:11px"><option>2</option><option>3</option><option selected>4</option><option>5</option><option>6</option></select><div id="names" style="margin-top:12px"></div><button class="btn primary block" id="go">開始</button><button class="btn block" id="back" style="margin-top:8px">戻る</button></div>`;const names=document.getElementById('names');function draw(){names.innerHTML='';for(let i=0;i<+document.getElementById('num').value;i++)names.innerHTML+=`<label>プレイヤー${i+1}<input id="ln${i}" value="プレイヤー${i+1}" maxlength="12"></label>`}document.getElementById('num').onchange=draw;draw();document.getElementById('back').onclick=renderStart;document.getElementById('go').onclick=()=>{localNames=Array.from({length:+document.getElementById('num').value},(_,i)=>document.getElementById('ln'+i).value||'プレイヤー'+(i+1));localState=initialState(localNames,8);localState.phase='initial_setup';App.localSeat=0;renderLocal()}}
-function renderLocal(){const s=localState;if(s.phase==='initial_setup'){renderInitialLocal(s);return}if(s.phase==='parent_select'||s.phase==='child_select'){renderFieldLocal(s);return}if(s.phase==='conversation'){renderConversationLocal(s);return}if(s.phase==='assignment'){renderAssignmentLocal(s);return}if(s.phase==='round_result'){renderRoundResultLocal(s);return}if(s.phase==='confession'){renderConfessionLocal(s);return}if(s.phase==='gameover'){renderGameoverLocal(s)}}
-function renderInitialLocal(s){const p=s.players[App.localSeat];root.innerHTML=`<div class="card center"><div class="phase">${esc(p.name)}の設定</div><h2>初期4ポイントを配分</h2><div id="alloc"></div><div class="notice">残り：<b id="remain"></b></div><button class="btn primary block" id="ok" style="margin-top:12px">確定</button></div>`;const box=document.getElementById('alloc');Object.entries(STAT).forEach(([k,v])=>box.innerHTML+=`<div class="row" style="justify-content:space-between;margin:9px 0"><b>${v.label}</b><div class="row"><button class="btn" data-m="${k}">−</button><b id="n-${k}" style="width:25px">${p.initialStats[k]}</b><button class="btn" data-p="${k}">＋</button></div></div>`);function draw(){const n=Object.values(p.initialStats).reduce((a,b)=>a+b,0);document.getElementById('remain').textContent=4-n;Object.keys(p.initialStats).forEach(k=>document.getElementById('n-'+k).textContent=p.initialStats[k]);document.getElementById('ok').disabled=n!==4}box.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>{const k=b.dataset.p,n=Object.values(p.initialStats).reduce((a,x)=>a+x,0);if(n<4){p.initialStats[k]++;draw()}});box.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>{const k=b.dataset.m;if(p.initialStats[k]>0){p.initialStats[k]--;draw()}});draw();document.getElementById('ok').onclick=()=>{p.stats={...p.initialStats};p.initialConfirmed=true;if(s.players.every(x=>x.initialConfirmed)){s.round=1;s.parent=0;s.fieldCards=makeCards();s.phase='parent_select'}else App.localSeat=(App.localSeat+1)%s.players.length;renderLocal()}}
-function renderFieldLocal(s){const me=s.players[App.localSeat];const allowed=s.phase==='parent_select'?App.localSeat===s.parent:App.localSeat!==s.parent;const childTurn=s.phase==='child_select'?s.players.find(p=>p.id!==s.parent&&!s.selected[p.id])?.id:null;root.innerHTML=`<div class="card"><div class="phase">第${s.round}/${s.totalRounds}</div><h2>${esc(me.name)}の番</h2><p class="muted">${s.phase==='parent_select'?'親として1枚選んでください。':'子として残りから1枚選んでください。'}</p>${statusOwn(me)}</div><div class="card"><div class="cards">${s.fieldCards.map(c=>cardHtml(c,s.selected[me.id]===c.id,usedIds(s).includes(c.id)||!allowed||(s.phase==='child_select'&&childTurn!==me.id))).join('')}</div></div>`;root.querySelectorAll('[data-card]').forEach(n=>n.onclick=()=>{const cid=n.dataset.card;if(!allowed||usedIds(s).includes(cid))return;s.selected[me.id]=cid;if(s.phase==='parent_select')s.phase='child_select';else if(Object.keys(s.selected).length===s.players.length)s.phase='conversation';App.localSeat=(s.phase==='child_select'?s.players.find(p=>p.id!==s.parent&&!s.selected[p.id])?.id:0)??0;if(s.phase==='conversation')App.localSeat=0;renderLocal()})}
-function renderConversationLocal(s){root.innerHTML=`<div class="card"><div class="phase">会話タイム</div><h2>💬 会話タイム</h2><p class="muted">全員で自由に会話。会話のタネを使って、女性がどこへ行くか決めてください。</p><div class="grid">${s.players.map(p=>{const c=s.fieldCards.find(x=>x.id===s.selected[p.id]);return `<div class="notice"><b>${esc(p.name)}</b><br>${c.icon}${esc(c.place)}<br>${STAT[c.status].label} +${c.value}<br>💬 ${esc(c.topic)}</div>`}).join('')}</div><button class="btn primary block" id="go">配置へ</button></div>`;document.getElementById('go').onclick=()=>{s.phase='assignment';s.assignments={};s.assignmentDone={};App.localSeat=0;renderLocal()}}
-function renderAssignmentLocal(s){const p=s.players[App.localSeat];const cards=s.fieldCards.filter(c=>usedIds(s).includes(c.id));root.innerHTML=`<div class="card"><div class="phase">${esc(p.name)}：女性配置</div><h2>会話の結果、女性はどこへ？</h2><div class="cards">${cards.map(c=>`<div class="date ${s.assignments[p.id]===c.id?'selected':''}" data-c="${c.id}">${c.icon}<div class="name">${esc(c.place)}</div><span class="pill">${STAT[c.status].label} +${c.value}</span></div>`).join('')}</div><button class="btn primary block" id="ok" ${!s.assignments[p.id]?'disabled':''} style="margin-top:12px">確定</button></div>`;root.querySelectorAll('[data-c]').forEach(n=>n.onclick=()=>{s.assignments[p.id]=n.dataset.c;renderLocal()});document.getElementById('ok').onclick=()=>{s.assignmentDone[p.id]=true;if(Object.keys(s.assignmentDone).length===s.players.length)s.phase='round_result';else App.localSeat=(App.localSeat+1)%s.players.length;renderLocal()}}
-function renderRoundResultLocal(s){const counts={};s.fieldCards.forEach(c=>counts[c.id]=0);Object.values(s.assignments).forEach(cid=>counts[cid]++);root.innerHTML=`<div class="card"><h2>💞 デート結果</h2><div class="grid">${s.players.map(p=>{const c=s.fieldCards.find(x=>x.id===s.selected[p.id]);const n=counts[c.id];const ok=n===1,m=p.id===s.parent?2:1;return `<div class="notice"><b>${esc(p.name)}</b><br>${c.icon}${esc(c.place)}<br>${ok?'2人きり！':'2人きり失敗'}<br>${ok?STAT[c.status].label+' +'+c.value*m:'獲得なし'}</div>`}).join('')}</div><button class="btn primary block" id="go">次へ</button></div>`;document.getElementById('go').onclick=()=>{applyRoundResult(s);App.localSeat=0;renderLocal()}}
-function renderConfessionLocal(s){const winners={};Object.keys(STAT).forEach(k=>{const max=Math.max(...s.players.map(p=>p.stats[k]));winners[k]=s.players.filter(p=>p.stats[k]===max)});root.innerHTML=`<div class="card"><h1>👑 告白タイム</h1><p class="muted">全員のステータス公開！</p><div class="grid">${s.players.map(p=>`<div class="notice"><b>${esc(p.name)}</b>${statusOwn(p)}</div>`).join('')}</div></div><div class="card"><div class="beauty">${BEAUTIES.map(b=>`<div class="card"><div style="font-size:34px">👸</div><h3>${b.name}</h3><b>${winners[b.id].map(p=>esc(p.name)).join('・')}</b><p class="small">同率の場合は全員を表示し、実装上は先着順で1点</p></div>`).join('')}</div><button class="btn primary block" id="go" style="margin-top:14px">結果を見る</button></div>`;document.getElementById('go').onclick=()=>{Object.keys(STAT).forEach(k=>{const max=Math.max(...s.players.map(p=>p.stats[k]));const w=s.players.find(p=>p.stats[k]===max);w.score++;w.beauties.push(k)});s.phase='gameover';renderLocal()}}
-function renderGameoverLocal(s){const ranking=[...s.players].sort((a,b)=>b.score-a.score);root.innerHTML=`<div class="card center"><div class="big">🏆</div><h1>${esc(ranking[0].name)}の勝利！</h1><p>${ranking[0].score}点</p></div><div class="card">${ranking.map((p,i)=>`<div class="notice" style="margin:8px 0"><b>${i+1}位 ${esc(p.name)}</b>　${p.score}点<br>${statusOwn(p)}</div>`).join('')}</div><button class="btn primary block" id="again">もう一度</button><button class="btn block" id="title" style="margin-top:8px">タイトル</button>`;document.getElementById('again').onclick=()=>{localState=initialState(localNames,8);App.localSeat=0;renderLocal()};document.getElementById('title').onclick=renderStart}
+/* =====================================================================
+   4. アプリ状態・共通描画パーツ
+   ===================================================================== */
+const App = {
+  myUid: 'u_' + Math.random().toString(36).slice(2,10),
+  myName:'', roomCode:null, roomUnsub:null, roomDoc:null, mySeat:-1,
+  initSel:null, womenSel:null,
+};
+function el(html){ const t=document.createElement('template'); t.innerHTML=html.trim(); return t.content.firstElementChild; }
+const root = document.getElementById('root');
+function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+function renderStart(){
+  root.innerHTML='';
+  if(!fbReady){
+    root.appendChild(el(`<div class="card"><h2>エラー</h2><p class="small">Firebaseの設定が見つかりません。</p></div>`));
+    return;
+  }
+  root.appendChild(el(`
+    <div class="card">
+      <h2>💘 告白タイミング</h2>
+      <p class="muted small">2〜6人（推奨3〜5人）。デート場所を選び、女性たちの心を掴んで爆美女の告白を勝ち取ろう！</p>
+      <label>あなたの名前</label>
+      <input type="text" id="oname" value="あなた" maxlength="10" />
+      <div class="section-label">ルームを作成する</div>
+      <label>参加人数の上限</label>
+      <div class="row" id="seat-pick"></div>
+      <label style="margin-top:10px;">ラウンド数</label>
+      <div class="row" id="round-pick"></div>
+      <button class="btn primary block" id="create" style="margin-top:10px;">ルームを作成する</button>
+      <div class="section-label">ルームに参加する</div>
+      <div class="row">
+        <input type="text" id="joincode" placeholder="ルームコード（例: A3F9K）" maxlength="8" style="text-transform:uppercase;" />
+        <button class="btn primary small" id="join">参加する</button>
+      </div>
+      <div id="online-error" class="small" style="color:var(--pink-deep);font-weight:700;margin-top:8px;"></div>
+      <div class="center" style="margin-top:10px;"><span class="help-toggle" id="toggle-rules">ルールを見る</span></div>
+      <div id="rules-body" class="hidden"></div>
+    </div>
+  `));
+  let maxSeats=4, totalRounds=8;
+  const seatBox = document.getElementById('seat-pick');
+  [2,3,4,5,6].forEach(n=>{
+    const b = el(`<button class="btn small ${n===maxSeats?'selected':''}">${n}人</button>`);
+    b.onclick=()=>{ maxSeats=n; [...seatBox.children].forEach(c=>c.classList.remove('selected')); b.classList.add('selected'); };
+    seatBox.appendChild(b);
+  });
+  const roundBox = document.getElementById('round-pick');
+  [6,8,10].forEach(n=>{
+    const b = el(`<button class="btn small ${n===totalRounds?'selected':''}">${n}R</button>`);
+    b.onclick=()=>{ totalRounds=n; [...roundBox.children].forEach(c=>c.classList.remove('selected')); b.classList.add('selected'); };
+    roundBox.appendChild(b);
+  });
+  document.getElementById('toggle-rules').onclick=(e)=>{
+    const b=document.getElementById('rules-body');
+    if(b.classList.contains('hidden')){ b.classList.remove('hidden'); b.innerHTML=rulesHtml(); e.target.textContent='閉じる'; }
+    else{ b.classList.add('hidden'); e.target.textContent='ルールを見る'; }
+  };
+  document.getElementById('create').onclick = async ()=>{
+    App.myName = document.getElementById('oname').value.trim()||'あなた';
+    setErr('');
+    try{ await createRoom(maxSeats, totalRounds); }catch(e){ console.error(e); setErr('ルーム作成に失敗: '+e.message); }
+  };
+  document.getElementById('join').onclick = async ()=>{
+    App.myName = document.getElementById('oname').value.trim()||'あなた';
+    const code = document.getElementById('joincode').value.trim().toUpperCase();
+    if(!code){ setErr('ルームコードを入力してください'); return; }
+    setErr('');
+    try{ await joinRoom(code); }catch(e){ console.error(e); setErr('参加に失敗: '+e.message); }
+  };
+}
+function setErr(msg){ const n=document.getElementById('online-error'); if(n) n.textContent=msg; }
+function rulesHtml(){
+  return `
+    <p>親が5枚（人数が多い時はそれ以上）のデート場所から1枚選び、続いて子が順番に残りから1枚ずつ選びます。会話フェイズの後、全員で女性たちをどのデート場所に行かせるか相談して決めます。</p>
+    <p>親が選んだ場所に女性がちょうど1人だけ来たら、そのカードのステータス値を<b>2倍</b>獲得。子の場所にちょうど1人だけなら<b>1倍</b>獲得。0人や2人以上なら報酬なし。</p>
+    <p>他プレイヤーの現在ステータスは最終ラウンドまで非公開です。最終ラウンドで全員のステータスを公開し、4つのステータスそれぞれの1位が「爆美女」を獲得。獲得数が最多のプレイヤーが優勝です。</p>
+  `;
+}
+function randomCode(){ const chars='ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; let s=''; for(let i=0;i<5;i++) s+=chars[Math.floor(Math.random()*chars.length)]; return s; }
+async function createRoom(maxSeats, totalRounds){
+  for(let attempt=0; attempt<5; attempt++){
+    const code = randomCode();
+    const ref = db.collection(ROOM_COLLECTION).doc(code);
+    try{
+      await db.runTransaction(async (tx)=>{
+        const snap = await tx.get(ref);
+        if(snap.exists) throw new Error('exists');
+        const seats = Array.from({length:maxSeats}, ()=>null);
+        seats[0] = {uid:App.myUid, name:App.myName};
+        tx.set(ref, {
+          status:'waiting', gameType:'confession',
+          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+          maxSeats, totalRounds, seats, playingSeats:null, game:null,
+        });
+      });
+      App.roomCode = code;
+      subscribeRoom(code);
+      return;
+    }catch(e){ if(e.message==='exists') continue; throw e; }
+  }
+  throw new Error('コード発行に失敗しました。もう一度お試しください。');
+}
+async function joinRoom(code){
+  const ref = db.collection(ROOM_COLLECTION).doc(code);
+  await db.runTransaction(async (tx)=>{
+    const snap = await tx.get(ref);
+    if(!snap.exists) throw new Error('そのルームコードは見つかりません。');
+    const data = snap.data();
+    if(data.status!=='waiting') throw new Error('このルームはすでに開始しています。');
+    const seats = data.seats.slice();
+    const already = seats.findIndex(s=>s && s.uid===App.myUid);
+    if(already<0){
+      const idx = seats.findIndex(s=>s===null);
+      if(idx<0) throw new Error('ルームは満席です。');
+      seats[idx] = {uid:App.myUid, name:App.myName};
+    }
+    tx.update(ref, {seats});
+  });
+  App.roomCode = code;
+  subscribeRoom(code);
+}
+function subscribeRoom(code){
+  if(App.roomUnsub) App.roomUnsub();
+  const ref = db.collection(ROOM_COLLECTION).doc(code);
+  App.roomUnsub = ref.onSnapshot((snap)=>{
+    if(!snap.exists){ renderErrorScreen('ルームが見つかりません。'); return; }
+    App.roomDoc = snap.data();
+    const seatsForLookup = App.roomDoc.playingSeats || App.roomDoc.seats;
+    App.mySeat = seatsForLookup.findIndex(s=>s && s.uid===App.myUid);
+    if(App.roomDoc.status==='waiting') renderLobby(code, ref);
+    else renderGame(code, ref);
+  }, (err)=>{ console.error(err); renderErrorScreen('通信エラー: '+err.message); });
+}
+function renderErrorScreen(msg){
+  root.innerHTML='';
+  root.appendChild(el(`<div class="card center"><h2>エラー</h2><p>${escapeHtml(msg)}</p><button class="btn block" id="back">タイトルへ</button></div>`));
+  document.getElementById('back').onclick=()=>{ if(App.roomUnsub){App.roomUnsub();App.roomUnsub=null;} renderStart(); };
+}
+function renderLobby(code, ref){
+  root.innerHTML='';
+  const isHost = App.roomDoc.seats[0] && App.roomDoc.seats[0].uid===App.myUid;
+  const filled = App.roomDoc.seats.filter(Boolean).length;
+  const wrap = el(`<div class="card"></div>`);
+  wrap.appendChild(el(`<h2>ルーム待機中</h2>`));
+  wrap.appendChild(el(`<div class="room-code">${code}</div>`));
+  wrap.appendChild(el(`<div class="center muted small" style="margin-bottom:10px;">このコードを他のプレイヤーに共有してください（2人以上で開始できます）</div>`));
+  wrap.appendChild(el(`<div class="center small">ラウンド数: <b>${App.roomDoc.totalRounds}</b> ／ 定員: <b>${App.roomDoc.maxSeats}人</b></div>`));
+  const list = el(`<div class="seat-list"></div>`);
+  App.roomDoc.seats.forEach((s,i)=>{
+    if(s) list.appendChild(el(`<div class="seat-item"><span>${escapeHtml(s.name)}${s.uid===App.myUid?'（あなた）':''}</span><span class="tag">席${i+1}</span></div>`));
+    else list.appendChild(el(`<div class="seat-item empty"><span>空席</span><span class="tag">席${i+1}</span></div>`));
+  });
+  wrap.appendChild(list);
+  if(isHost){
+    const b = el(`<button class="btn primary block">ゲームを開始する（現在${filled}人）</button>`);
+    b.disabled = filled<2;
+    b.onclick = async ()=>{ try{ await startGame(ref); }catch(e){ console.error(e); addErr(wrap, e.message); } };
+    wrap.appendChild(b);
+  } else {
+    wrap.appendChild(el(`<div class="muted small center">ホストの開始をお待ちください…（${filled}人参加中）</div>`));
+  }
+  const leave = el(`<button class="btn block">ルームを出る</button>`);
+  leave.onclick = ()=>{ if(App.roomUnsub){App.roomUnsub();App.roomUnsub=null;} renderStart(); };
+  wrap.appendChild(leave);
+  root.appendChild(wrap);
+}
+function addErr(wrap, msg){ wrap.appendChild(el(`<div class="small" style="color:var(--pink-deep);font-weight:700;margin-top:8px;">${escapeHtml(msg)}</div>`)); }
+async function startGame(ref){
+  await db.runTransaction(async (tx)=>{
+    const snap = await tx.get(ref);
+    const data = snap.data();
+    if(data.status!=='waiting') return;
+    const activeSeats = data.seats.filter(Boolean);
+    if(activeSeats.length<2) throw new Error('2人以上が必要です。');
+    const names = activeSeats.map(s=>s.name);
+    const state = Game3.newGame(names, data.totalRounds);
+    tx.update(ref, {status:'playing', playingSeats:activeSeats, game:state});
+  });
+}
+async function action(ref, fn){
+  try{
+    await db.runTransaction(async (tx)=>{
+      const snap = await tx.get(ref);
+      const data = snap.data();
+      if(data.status!=='playing') return;
+      const newState = fn(data.game);
+      tx.update(ref, {game:newState});
+    });
+  }catch(e){ console.error('action failed', e); }
+}
+async function restartGame(ref, prevState){
+  await db.runTransaction(async (tx)=>{
+    const snap = await tx.get(ref);
+    const data = snap.data();
+    const names = prevState.players.map(p=>p.name);
+    const state = Game3.newGame(names, data.totalRounds);
+    tx.update(ref, {status:'playing', game:state});
+  });
+}
+
+/* =====================================================================
+   5. 共通UIパーツ
+   ===================================================================== */
+function statusBar(state){
+  return el(`
+    <div class="status">
+      <div class="box"><div class="lbl">ラウンド</div><div class="val">${state.phase==='final'?'終了':state.currentRound+' / '+state.totalRounds}</div></div>
+      <div class="box"><div class="lbl">親</div><div class="val">${escapeHtml(state.players[state.parentIndex] ? state.players[state.parentIndex].name : '-')}</div></div>
+      <div class="box"><div class="lbl">プレイヤー</div><div class="val">${state.players.length}人</div></div>
+    </div>
+  `);
+}
+function dateCardEl(card, opts){
+  opts=opts||{};
+  const meta = STATUS_META[card.status];
+  const cls=['datecard']; if(opts.selected) cls.push('selected'); if(opts.taken) cls.push('taken');
+  const node = el(`
+    <div class="${cls.join(' ')}">
+      <div class="icon">${card.icon}</div>
+      <div class="name">${escapeHtml(card.name)}</div>
+      <div class="stat-badge" style="background:${meta.color}">${meta.emoji} +${card.value}</div>
+      <div class="time-badge">${TIME_META[card.time].emoji} ${TIME_META[card.time].label}</div>
+      <div class="topic">💬 ${escapeHtml(card.topic)}</div>
+    </div>
+  `);
+  if(opts.onClick && !opts.taken) node.addEventListener('click', ()=>opts.onClick(card.id));
+  return node;
+}
+function myStatsPanel(player){
+  const wrap = el(`<div class="card"></div>`);
+  wrap.appendChild(el(`<div class="section-label">あなたのステータス（他の人には見えません）</div>`));
+  const row = el(`<div class="row"></div>`);
+  STATUS_IDS.forEach(k=>{
+    row.appendChild(el(`<div class="pill on" style="background:${STATUS_META[k].color}">${STATUS_META[k].emoji} ${STATUS_META[k].label} ${player.stats[k]}</div>`));
+  });
+  wrap.appendChild(row);
+  return wrap;
+}
+
+/* =====================================================================
+   6. フェーズ別画面
+   ===================================================================== */
+function renderGame(code, ref){
+  const state = App.roomDoc.game;
+  const mySeat = App.mySeat;
+  if(mySeat<0){ root.innerHTML=''; root.appendChild(el(`<div class="card center"><h2>観戦中</h2></div>`)); return; }
+  if(state.phase==='initial_stats') return renderInitialStats(state, ref, mySeat);
+  if(state.phase==='parent_pick') return renderParentPick(state, ref, mySeat);
+  if(state.phase==='child_pick') return renderChildPick(state, ref, mySeat);
+  if(state.phase==='conversation') return renderConversation(state, ref, mySeat);
+  if(state.phase==='women_placement') return renderWomenPlacement(state, ref, mySeat);
+  if(state.phase==='results') return renderResults(state, ref, mySeat);
+  if(state.phase==='final') return renderFinal(state, ref, mySeat);
+}
+function renderInitialStats(state, ref, mySeat){
+  const me = state.players[mySeat];
+  if(state.pendingInitialStats[mySeat]){
+    root.innerHTML='';
+    const wrap = el(`<div class="card center"><h2>💗 初期ステータス設定</h2><p class="muted small">決定済みです。他のプレイヤーを待っています…</p></div>`);
+    root.appendChild(wrap);
+    return;
+  }
+  App.initSel = App.initSel || {affection:1,tension:1,expense:1,romantic:1};
+  root.innerHTML='';
+  const wrap = el(`<div class="card"><h2>💗 初期ステータス設定</h2><p class="muted small">合計4ポイントになるよう自由に振り分けてください。</p></div>`);
+  const sum = STATUS_IDS.reduce((a,k)=>a+App.initSel[k],0);
+  STATUS_IDS.forEach(k=>{
+    const row = el(`
+      <div class="stat-row">
+        <span class="name">${STATUS_META[k].emoji} ${STATUS_META[k].label}</span>
+        <div class="ctrl">
+          <button class="roundbtn" data-act="minus">－</button>
+          <span class="num">${App.initSel[k]}</span>
+          <button class="roundbtn" data-act="plus">＋</button>
+        </div>
+      </div>
+    `);
+    row.querySelector('[data-act=minus]').onclick = ()=>{ if(App.initSel[k]>0){ App.initSel[k]--; renderInitialStats(state, ref, mySeat); } };
+    row.querySelector('[data-act=plus]').onclick = ()=>{ if(sum<4){ App.initSel[k]++; renderInitialStats(state, ref, mySeat); } };
+    row.querySelector('[data-act=minus]').disabled = App.initSel[k]<=0;
+    row.querySelector('[data-act=plus]').disabled = sum>=4;
+    wrap.appendChild(row);
+  });
+  wrap.appendChild(el(`<div class="center" style="margin:10px 0;font-weight:900;">残りポイント: ${4-sum}</div>`));
+  const btn = el(`<button class="btn primary block">これで決定する</button>`);
+  btn.disabled = sum!==4;
+  btn.onclick = async ()=>{ const sel={...App.initSel}; await action(ref, s=>Game3.setInitialStats(s, mySeat, sel)); };
+  wrap.appendChild(btn);
+  root.appendChild(wrap);
+}
+function renderParentPick(state, ref, mySeat){
+  root.innerHTML='';
+  const wrap = el(`<div></div>`);
+  wrap.appendChild(statusBar(state));
+  const isParent = state.parentIndex===mySeat;
+  const card = el(`<div class="card"></div>`);
+  card.appendChild(el(`<h3>${isParent? '💌 あなたが親です。デート場所を1枚選んでください' : `${escapeHtml(state.players[state.parentIndex].name)}（親）が選択中…`}</h3>`));
+  const cw = el(`<div class="card-wrap"></div>`);
+  state.fieldCards.forEach(c=> cw.appendChild(dateCardEl(c, { onClick: isParent ? (id)=> action(ref, s=>Game3.parentPick(s, id)) : null })));
+  card.appendChild(cw);
+  wrap.appendChild(card);
+  wrap.appendChild(myStatsPanel(state.players[mySeat]));
+  root.appendChild(wrap);
+}
+function renderChildPick(state, ref, mySeat){
+  root.innerHTML='';
+  const wrap = el(`<div></div>`);
+  wrap.appendChild(statusBar(state));
+  const currentPicker = state.childTurnOrder[state.childTurnPointer];
+  const isMyTurn = currentPicker===mySeat;
+  const taken = new Set([state.parentCardId, ...Object.values(state.selections)]);
+  const card = el(`<div class="card"></div>`);
+  card.appendChild(el(`<h3>${isMyTurn? '👉 あなたの番です。デート場所を選んでください' : `${escapeHtml(state.players[currentPicker].name)} が選択中…`}</h3>`));
+  const cw = el(`<div class="card-wrap"></div>`);
+  state.fieldCards.forEach(c=>{
+    const isTaken = taken.has(c.id);
+    cw.appendChild(dateCardEl(c, { taken:isTaken, onClick: (isMyTurn && !isTaken) ? (id)=> action(ref, s=>Game3.childPick(s, mySeat, id)) : null }));
+  });
+  card.appendChild(cw);
+  wrap.appendChild(card);
+  wrap.appendChild(myStatsPanel(state.players[mySeat]));
+  root.appendChild(wrap);
+}
+function renderConversation(state, ref, mySeat){
+  root.innerHTML='';
+  const wrap = el(`<div></div>`);
+  wrap.appendChild(statusBar(state));
+  const card = el(`<div class="card"></div>`);
+  card.appendChild(el(`<h3>💬 会話フェイズ</h3><p class="muted small">それぞれの場所の「会話のタネ」で自由に話しましょう。</p>`));
+  const entries = [{pid:state.parentIndex, cid:state.parentCardId, isParent:true}, ...Object.entries(state.selections).map(([pid,cid])=>({pid:+pid, cid, isParent:false}))];
+  entries.forEach(en=>{
+    const c = state.fieldCards.find(x=>x.id===en.cid);
+    card.appendChild(el(`
+      <div class="result-line">
+        <span class="icon">${c.icon}</span>
+        <span>${en.isParent?'👑 ':''}<b>${escapeHtml(state.players[en.pid].name)}</b> → ${escapeHtml(c.name)}<br><span class="small muted">💬 ${escapeHtml(c.topic)}</span></span>
+      </div>
+    `));
+  });
+  const btn = el(`<button class="btn primary block">会話終了・女性配置へ</button>`);
+  btn.onclick = ()=> action(ref, s=>Game3.finishConversation(s));
+  card.appendChild(btn);
+  wrap.appendChild(card);
+  wrap.appendChild(myStatsPanel(state.players[mySeat]));
+  root.appendChild(wrap);
+}
+function renderWomenPlacement(state, ref, mySeat){
+  root.innerHTML='';
+  const wrap = el(`<div></div>`);
+  wrap.appendChild(statusBar(state));
+  const card = el(`<div class="card"></div>`);
+  card.appendChild(el(`<h3>👗 女性配置フェイズ</h3><p class="muted small">相談して、それぞれの女性をどのデート場所へ行かせるか決めてください（全員操作できます）。</p>`));
+  App.womenSel = App.womenSel===undefined ? null : App.womenSel;
+  const pool = el(`<div class="women-pool"></div>`);
+  Object.keys(state.womenPlacements).forEach(idx=>{
+    const placed = state.womenPlacements[idx]!==null;
+    const t = el(`<div class="woman-token ${placed?'placed':''}">👩</div>`);
+    t.title = '女性 '+(+idx+1);
+    t.onclick = ()=>{ App.womenSel = (App.womenSel===idx? null: idx); renderWomenPlacement(state, ref, mySeat); };
+    if(App.womenSel===idx) t.style.boxShadow='0 0 0 3px var(--pink-deep)';
+    pool.appendChild(t);
+  });
+  card.appendChild(pool);
+  if(App.womenSel!==null) card.appendChild(el(`<div class="small center muted" style="margin-bottom:8px;">女性${(+App.womenSel)+1}を配置する場所をタップしてください</div>`));
+  const entries = [{pid:state.parentIndex, cid:state.parentCardId, isParent:true}, ...Object.entries(state.selections).map(([pid,cid])=>({pid:+pid, cid, isParent:false}))];
+  entries.forEach(en=>{
+    const c = state.fieldCards.find(x=>x.id===en.cid);
+    const here = Object.entries(state.womenPlacements).filter(([k,v])=>v===en.cid).map(([k])=>k);
+    const target = el(`<div class="placement-target"></div>`);
+    target.appendChild(el(`<div class="ptitle">${c.icon} ${escapeHtml(c.name)}（${en.isParent?'👑 ':''}${escapeHtml(state.players[en.pid].name)}）</div>`));
+    const row = el(`<div class="row"></div>`);
+    here.forEach(()=> row.appendChild(el(`<div class="woman-token placed">👩</div>`)));
+    target.appendChild(row);
+    target.onclick = ()=>{ if(App.womenSel!==null){ action(ref, s=>Game3.placeWoman(s, +App.womenSel, en.cid)); App.womenSel=null; } };
+    card.appendChild(target);
+  });
+  const unassignBtn = el(`<div class="small help-toggle center" style="display:block;margin-bottom:8px;">配置をリセットしたい女性を選んで、ここをタップで未配置に戻す</div>`);
+  unassignBtn.onclick = ()=>{ if(App.womenSel!==null){ action(ref, s=>Game3.placeWoman(s, +App.womenSel, null)); App.womenSel=null; } };
+  card.appendChild(unassignBtn);
+  const allPlaced = Object.values(state.womenPlacements).every(v=>v!==null);
+  const confirmBtn = el(`<button class="btn primary block">この配置で確定する</button>`);
+  confirmBtn.disabled = !allPlaced;
+  confirmBtn.onclick = ()=> action(ref, s=>Game3.confirmPlacement(s));
+  card.appendChild(confirmBtn);
+  wrap.appendChild(card);
+  wrap.appendChild(myStatsPanel(state.players[mySeat]));
+  root.appendChild(wrap);
+}
+function renderResults(state, ref, mySeat){
+  root.innerHTML='';
+  const wrap = el(`<div></div>`);
+  wrap.appendChild(statusBar(state));
+  const card = el(`<div class="card"></div>`);
+  card.appendChild(el(`<h3>📋 第${state.currentRound}ラウンド結果</h3>`));
+  state.lastRoundResults.forEach(r=>{
+    const meta = STATUS_META[r.card.status];
+    card.appendChild(el(`
+      <div class="result-line ${r.success?'success':''}">
+        <span class="icon">${r.card.icon}</span>
+        <span>${r.isParent?'👑 ':''}<b>${escapeHtml(state.players[r.playerId].name)}</b> - ${escapeHtml(r.card.name)}（女性${r.womenHere}人）<br>
+        <span class="small">${r.success? `💕 2人きり成功！ ${meta.emoji}${meta.label} +${r.awarded}` : '不成立（報酬なし）'}</span></span>
+      </div>
+    `));
+  });
+  const btn = el(`<button class="btn primary block">${state.currentRound>=state.totalRounds?'告白タイムへ':'次のラウンドへ'}</button>`);
+  btn.onclick = ()=> action(ref, s=>Game3.nextRound(s));
+  card.appendChild(btn);
+  wrap.appendChild(card);
+  wrap.appendChild(myStatsPanel(state.players[mySeat]));
+  root.appendChild(wrap);
+}
+function renderFinal(state, ref, mySeat){
+  root.innerHTML='';
+  const isHost = App.roomDoc.playingSeats[0] && App.roomDoc.playingSeats[0].uid===App.myUid;
+  const wrap = el(`<div></div>`);
+  wrap.appendChild(el(`<div class="card center"><h2>💋 告白タイム</h2><p class="muted small">全員のステータスが公開されました！</p></div>`));
+
+  const statsCard = el(`<div class="card"></div>`);
+  statsCard.appendChild(el(`<div class="section-label">最終ステータス</div>`));
+  const table = el(`<table class="finaltable"><thead><tr><th>プレイヤー</th>${STATUS_IDS.map(k=>`<th>${STATUS_META[k].emoji}</th>`).join('')}</tr></thead><tbody></tbody></table>`);
+  const tbody = table.querySelector('tbody');
+  state.players.forEach(p=>{
+    tbody.appendChild(el(`<tr><td>${escapeHtml(p.name)}</td>${STATUS_IDS.map(k=>`<td>${p.stats[k]}</td>`).join('')}</tr>`));
+  });
+  statsCard.appendChild(table);
+  wrap.appendChild(statsCard);
+
+  const beautyCard = el(`<div class="card"></div>`);
+  beautyCard.appendChild(el(`<div class="section-label">爆美女の告白結果</div>`));
+  STATUS_IDS.forEach(stat=>{
+    const res = state.confession[stat];
+    const winner = state.players.find(p=>p.id===res.winnerId);
+    const meta = STATUS_META[stat];
+    beautyCard.appendChild(el(`
+      <div class="beauty-card" style="background:${meta.color}">
+        <div style="font-size:1.4rem;">${meta.emoji} ${meta.label}の爆美女</div>
+        <div style="font-size:1.1rem;font-weight:900;margin-top:4px;">💋 ${escapeHtml(winner.name)} が告白成功！</div>
+        <div class="small" style="opacity:.9;">(${meta.label} ${res.value} / ${res.reason})</div>
+      </div>
+    `));
+  });
+  wrap.appendChild(beautyCard);
+
+  const rankCard = el(`<div class="card"></div>`);
+  rankCard.appendChild(el(`<div class="section-label">最終順位</div>`));
+  const sorted = state.players.slice().sort((a,b)=>b.score-a.score);
+  sorted.forEach((p,i)=>{
+    rankCard.appendChild(el(`
+      <div class="result-line ${i===0?'success':''}">
+        <span class="icon">${i===0?'🏆':(i+1)+'位'}</span>
+        <span><b>${escapeHtml(p.name)}</b> - 爆美女${p.score}人 (${p.beautyGirls.map(s=>STATUS_META[s].emoji).join(' ')||'なし'})</span>
+      </div>
+    `));
+  });
+  wrap.appendChild(rankCard);
+
+  if(isHost){
+    const b = el(`<button class="btn primary block">もう一度（同じメンバーで）</button>`);
+    b.onclick = async ()=>{ try{ await restartGame(ref, state); }catch(e){ console.error(e); } };
+    wrap.appendChild(b);
+  }
+  const exitBtn = el(`<button class="btn block">タイトルへ戻る</button>`);
+  exitBtn.onclick = ()=>{ if(App.roomUnsub){App.roomUnsub();App.roomUnsub=null;} renderStart(); };
+  wrap.appendChild(exitBtn);
+  root.appendChild(wrap);
+}
+
+/* =====================================================================
+   7. 起動
+   ===================================================================== */
 renderStart();
 </script>
-</body></html>
+</body>
+</html>
