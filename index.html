@@ -138,7 +138,7 @@ const LOCATIONS = [
   {name:'神社', icon:'⛩️'}, {name:'プラネタリウム', icon:'🔭'}, {name:'ドライブ', icon:'🚗'},
   {name:'夜の街', icon:'🌆'}, {name:'ホテルラウンジ', icon:'🛋️'},
 ];
-const TOPICS = ['好きな食べ物','好きな映画','音楽','旅行','動物','仕事','学校','趣味','休日','恋愛','子どもの頃','最近ハマっていること','行ってみたい場所','好きな季節','理想のデート','秘密','苦手なこと','最近あった面白い話'];
+const TOPICS = ['好きな食べ物','好きな映画','音楽','旅行','動物','仕事','学校','趣味','休日','恋愛','子供の頃','最近ハマっていること','行ってみたい場所','好きな季節','理想のデート','秘密','苦手なこと','最近あった面白い話'];
 
 let _idc = 0;
 function nid(p){ return p+'_'+(_idc++); }
@@ -217,7 +217,7 @@ function startRound(state){
   state.fieldCards = drawFieldCards(state);
   state.selections = {};
   state.phase = 'selecting';
-  pushLog(state, `第${state.currentRound}ラウンド開始（親: ${state.players[state.parentIndex].name}）`);
+  pushLog(state, `第${state.currentRound}ラウンド開始（仮ヒロイン: ${state.players[state.parentIndex].name}）`);
   return state;
 }
 Game3.selectLocation = function(stateIn, playerId, cardId){
@@ -291,7 +291,7 @@ function computeConfession(state){
           const c3 = candidates.map(p=>({p, v:p.history[stat].filter(h=>h.viaParentMatch).length}));
           const m3 = Math.max(...c3.map(x=>x.v));
           candidates = c3.filter(x=>x.v===m3).map(x=>x.p);
-          reason = `親との2倍成立回数(${m3}回)で優先`;
+          reason = `仮ヒロインとの2倍成立回数(${m3}回)で優先`;
           if(candidates.length>1){ candidates=[candidates[Math.floor(Math.random()*candidates.length)]]; reason='ランダム決定'; }
         }
       }
@@ -305,7 +305,7 @@ function computeConfession(state){
   });
   state.confession = results;
   state.phase = 'final';
-  pushLog(state, '告白タイム：最強の美女が決定しました');
+  pushLog(state, '告白タイム：最強のヒロインが決定しました');
   return state;
 }
 
@@ -352,7 +352,7 @@ function renderStart(){
   root.appendChild(el(`
     <div class="card">
       <h2>💘 ここで待ってる</h2>
-      <p class="muted small">2〜6人（推奨3〜5人）。デート場所を選び、女性たちの心を掴んで最強の美女の告白を勝ち取ろう！</p>
+      <p class="muted small">2〜6人（推奨3〜5人）。デート場所を選び、女性たちの心を掴んで最強のヒロインの告白を勝ち取ろう！</p>
       <label>あなたの名前</label>
       <input type="text" id="oname" value="あなた" maxlength="10" />
       <div class="section-label">ルームを作成する</div>
@@ -405,9 +405,9 @@ function renderStart(){
 function setErr(msg){ const n=document.getElementById('online-error'); if(n) n.textContent=msg; }
 function rulesHtml(){
   return `
-    <p>親が今回のラウンドの「狙われる側」になります。まず親がこっそりデート場所を1つ選び（他の人には分かりません）、続いて子どもたちも全員こっそり1つずつ選びます（子ども同士がかぶってもOK。誰が何を選んだかは分かりません）。</p>
-    <p>全員が選び終えたら、選んだ場所が一斉に公開されます。親の場所にちょうど1人の子どもが重なっていたら、その子がカードのステータス値を<b>2倍</b>獲得。親のいない場所に子ども2人がちょうど重なっていたら、その2人が<b>1倍</b>ずつ獲得します（3人以上重なった場合や、誰もいない場合は報酬なしです）。</p>
-    <p>他プレイヤーの現在ステータスは最終ラウンドまで非公開です。最終ラウンドで全員のステータスを公開し、4つのステータスそれぞれの1位が「最強の美女」を獲得。獲得数が最多のプレイヤーが優勝です。</p>
+    <p>仮ヒロインが今回のラウンドの「狙われる側」になります。まず仮ヒロインがこっそりデート場所を1つ選び（他の人には分かりません）、続いて子羊たちも全員こっそり1つずつ選びます（子羊同士がかぶってもOK。誰が何を選んだかは分かりません）。</p>
+    <p>全員が選び終えたら、選んだ場所が一斉に公開されます。仮ヒロインの場所にちょうど1人の子羊が重なっていたら、その子がカードのステータス値を<b>2倍</b>獲得。仮ヒロインのいない場所に子羊2人がちょうど重なっていたら、その2人が<b>1倍</b>ずつ獲得します（3人以上重なった場合や、誰もいない場合は報酬なしです）。</p>
+    <p>他プレイヤーの現在ステータスは最終ラウンドまで非公開です。最終ラウンドで全員のステータスを公開し、4つのステータスそれぞれの1位が「最強のヒロイン」を獲得。獲得数が最多のプレイヤーが優勝です。</p>
   `;
 }
 function randomCode(){ const chars='ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; let s=''; for(let i=0;i<5;i++) s+=chars[Math.floor(Math.random()*chars.length)]; return s; }
@@ -539,7 +539,7 @@ function statusBar(state){
   return el(`
     <div class="status">
       <div class="box"><div class="lbl">ラウンド</div><div class="val">${state.phase==='final'?'終了':state.currentRound+' / '+state.totalRounds}</div></div>
-      <div class="box"><div class="lbl">親</div><div class="val">${escapeHtml(state.players[state.parentIndex] ? state.players[state.parentIndex].name : '-')}</div></div>
+      <div class="box"><div class="lbl">仮ヒロイン</div><div class="val">${escapeHtml(state.players[state.parentIndex] ? state.players[state.parentIndex].name : '-')}</div></div>
       <div class="box"><div class="lbl">プレイヤー</div><div class="val">${state.players.length}人</div></div>
     </div>
   `);
@@ -627,7 +627,7 @@ function renderSelecting(state, ref, mySeat){
   const already = state.selections[mySeat]!==undefined;
   const doneCount = Object.keys(state.selections).length;
   const card = el(`<div class="card"></div>`);
-  card.appendChild(el(`<h3>${isParent? '💌 あなたが今回の「親」です！こっそりデート場所を選んでください' : '🙊 デート場所をこっそり選んでください（親が誰か以外は秘密です）'}</h3>`));
+  card.appendChild(el(`<h3>${isParent? '💌 あなたが今回の「仮ヒロイン」です！こっそりデート場所を選んでください' : '🙊 デート場所をこっそり選んでください（仮ヒロインが誰か以外は秘密です）'}</h3>`));
   card.appendChild(el(`<p class="small muted">選択済み: ${doneCount} / ${state.players.length}人（誰が何を選んだかは全員決定後に一斉公開されます）</p>`));
   if(already){
     card.appendChild(el(`<div class="center small muted" style="padding:20px 0;">選択済みです。他のプレイヤーを待っています…</div>`));
@@ -645,13 +645,13 @@ function renderResults(state, ref, mySeat){
   const wrap = el(`<div></div>`);
   wrap.appendChild(statusBar(state));
   const card = el(`<div class="card"></div>`);
-  card.appendChild(el(`<h3>📋 第${state.currentRound}ラウンド結果公開</h3><p class="small muted">👑 = 今回の親</p>`));
+  card.appendChild(el(`<h3>📋 第${state.currentRound}ラウンド結果公開</h3><p class="small muted">👑 = 今回の仮ヒロイン</p>`));
   state.lastRoundResults.forEach(r=>{
     const meta = STATUS_META[r.card.status];
     const names = r.playerIds.map(pid=> (pid===state.parentIndex?'👑 ':'')+escapeHtml(state.players[pid].name)).join('、');
     let outcome;
-    if(r.success && r.hasParent) outcome = `💕 2人きり成功！（親と一致）${meta.emoji}${meta.label} +${r.awardedTo[0].awarded}`;
-    else if(r.success && !r.hasParent) outcome = `💞 子ども同士で2人きり成立！${meta.emoji}${meta.label} 各+${r.awardedTo[0].awarded}`;
+    if(r.success && r.hasParent) outcome = `💕 2人きり成功！（仮ヒロインと一致）${meta.emoji}${meta.label} +${r.awardedTo[0].awarded}`;
+    else if(r.success && !r.hasParent) outcome = `💞 子羊同士で2人きり成立！${meta.emoji}${meta.label} 各+${r.awardedTo[0].awarded}`;
     else outcome = '不成立（報酬なし）';
     card.appendChild(el(`
       <div class="result-line ${r.success?'success':''}">
@@ -685,14 +685,14 @@ function renderFinal(state, ref, mySeat){
   wrap.appendChild(statsCard);
 
   const beautyCard = el(`<div class="card"></div>`);
-  beautyCard.appendChild(el(`<div class="section-label">最強の美女の告白結果</div>`));
+  beautyCard.appendChild(el(`<div class="section-label">最強のヒロインの告白結果</div>`));
   STATUS_IDS.forEach(stat=>{
     const res = state.confession[stat];
     const winner = state.players.find(p=>p.id===res.winnerId);
     const meta = STATUS_META[stat];
     beautyCard.appendChild(el(`
       <div class="beauty-card" style="background:${meta.color}">
-        <div style="font-size:1.4rem;">${meta.emoji} ${meta.label}の最強の美女</div>
+        <div style="font-size:1.4rem;">${meta.emoji} ${meta.label}の最強のヒロイン</div>
         <div style="font-size:1.1rem;font-weight:900;margin-top:4px;">💋 ${escapeHtml(winner.name)} が告白成功！</div>
         <div class="small" style="opacity:.9;">(${meta.label} ${res.value} / ${res.reason})</div>
       </div>
@@ -707,7 +707,7 @@ function renderFinal(state, ref, mySeat){
     rankCard.appendChild(el(`
       <div class="result-line ${i===0?'success':''}">
         <span class="icon">${i===0?'🏆':(i+1)+'位'}</span>
-        <span><b>${escapeHtml(p.name)}</b> - 最強の美女${p.score}人 (${p.beautyGirls.map(s=>STATUS_META[s].emoji).join(' ')||'なし'})</span>
+        <span><b>${escapeHtml(p.name)}</b> - 最強のヒロイン${p.score}人 (${p.beautyGirls.map(s=>STATUS_META[s].emoji).join(' ')||'なし'})</span>
       </div>
     `));
   });
