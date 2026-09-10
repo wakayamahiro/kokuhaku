@@ -153,7 +153,7 @@ function buildLocationDeck(){
 }
 function generateCard(loc){
   const status = STATUS_IDS[Math.floor(Math.random()*4)];
-  const value = 1+Math.floor(Math.random()*3);
+  const value = 1; // ステータス値は一律+1（親と2人きりなら2倍の+2）
   const times = Object.keys(TIME_META);
   const time = times[Math.floor(Math.random()*3)];
   const topic = TOPICS[Math.floor(Math.random()*TOPICS.length)];
@@ -175,7 +175,7 @@ Game3.newGame = function(names, totalRounds){
   }));
   return {
     players, currentRound:1, totalRounds,
-    parentIndex:0,
+    parentIndex: Math.floor(Math.random()*names.length), // 最初の仮ヒロインはランダム決定
     deck: buildLocationDeck(), discardPile:[],
     fieldCards: [], selections:{},
     pendingInitialStats:{},
