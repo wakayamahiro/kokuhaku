@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<title>告白タイミング</title>
+<title>ここで待ってる</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;700;800;900&display=swap" rel="stylesheet">
@@ -84,17 +84,6 @@ input[type=text],input[type=number]{background:#fff;border:2px solid var(--line)
 
 .pill{display:inline-block;background:#fdeaf3;border-radius:999px;padding:4px 12px;font-size:.75rem;font-weight:800;margin:2px;}
 .pill.on{background:linear-gradient(135deg,var(--pink),var(--purple));color:#fff;}
-
-.woman-token{
-  width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;
-  font-size:1.2rem;background:#fff;border:2px solid var(--line);cursor:pointer;user-select:none;
-}
-.woman-token.placed{background:linear-gradient(135deg,var(--pink),var(--purple));border-color:transparent;}
-.placement-target{
-  background:#fff;border:2px dashed var(--line);border-radius:14px;padding:10px;margin-bottom:8px;min-height:70px;
-}
-.placement-target .ptitle{font-weight:800;font-size:.85rem;margin-bottom:6px;}
-.women-pool{display:flex;gap:8px;flex-wrap:wrap;padding:8px;background:#fbf4ff;border-radius:14px;margin-bottom:12px;}
 
 .result-line{display:flex;align-items:center;gap:10px;background:#fff;border:2px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:8px;}
 .result-line.success{border-color:var(--pink-deep);background:#fff5f9;}
@@ -188,9 +177,7 @@ Game3.newGame = function(names, totalRounds){
     players, currentRound:1, totalRounds,
     parentIndex:0,
     deck: buildLocationDeck(), discardPile:[],
-    fieldCards: [], selections:{}, parentCardId:null,
-    childTurnOrder:[], childTurnPointer:0,
-    womenCount: names.length, womenPlacements:{},
+    fieldCards: [], selections:{},
     pendingInitialStats:{},
     lastRoundResults: [],
     phase:'initial_stats',
@@ -213,14 +200,12 @@ Game3.setInitialStats = function(stateIn, playerId, statsObj){
   return state;
 };
 function drawFieldCards(state){
-  const n = Math.max(5, state.players.length);
-  const drawn = [];
-  for(let i=0;i<n;i++){
+  const drawn=[];
+  for(let i=0;i<5;i++){
     if(state.deck.length===0){
       if(state.discardPile.length===0) break;
-      state.deck = shuffle(state.discardPile);
-      state.discardPile = [];
-      pushLog(state, '山札が尽きたため、捨て札をシャッフルして再利用します');
+      state.deck = shuffle(state.discardPile); state.discardPile=[];
+      pushLog(state,'山札が尽きたため、捨て札をシャッフルして再利用します');
     }
     const loc = state.deck.pop();
     state.discardPile.push(loc);
@@ -231,86 +216,53 @@ function drawFieldCards(state){
 function startRound(state){
   state.fieldCards = drawFieldCards(state);
   state.selections = {};
-  state.parentCardId = null;
-  state.childTurnOrder = [];
-  state.childTurnPointer = 0;
-  state.womenPlacements = {};
-  state.phase = 'parent_pick';
+  state.phase = 'selecting';
   pushLog(state, `第${state.currentRound}ラウンド開始（親: ${state.players[state.parentIndex].name}）`);
   return state;
 }
-Game3.parentPick = function(stateIn, cardId){
+Game3.selectLocation = function(stateIn, playerId, cardId){
   const state = clone(stateIn);
-  if(state.phase!=='parent_pick') return state;
-  const card = state.fieldCards.find(c=>c.id===cardId);
-  if(!card) return state;
-  state.parentCardId = cardId;
-  const n = state.players.length;
-  const order = [];
-  for(let i=1;i<n;i++) order.push((state.parentIndex+i)%n);
-  state.childTurnOrder = order;
-  state.childTurnPointer = 0;
-  state.phase = 'child_pick';
-  pushLog(state, `${state.players[state.parentIndex].name}（親）が ${card.icon}${card.name} を選択`);
-  return state;
-};
-Game3.childPick = function(stateIn, playerId, cardId){
-  const state = clone(stateIn);
-  if(state.phase!=='child_pick') return state;
-  const expected = state.childTurnOrder[state.childTurnPointer];
-  if(expected!==playerId) return state;
-  if(cardId===state.parentCardId) return state;
-  if(Object.values(state.selections).includes(cardId)) return state;
+  if(state.phase!=='selecting') return state;
+  if(state.selections[playerId]!==undefined) return state;
   const card = state.fieldCards.find(c=>c.id===cardId);
   if(!card) return state;
   state.selections[playerId] = cardId;
-  pushLog(state, `${state.players[playerId].name} が ${card.icon}${card.name} を選択`);
-  state.childTurnPointer += 1;
-  if(state.childTurnPointer >= state.childTurnOrder.length) state.phase = 'conversation';
+  if(Object.keys(state.selections).length === state.players.length) return revealAndScore(state);
   return state;
 };
-Game3.finishConversation = function(stateIn){
-  const state = clone(stateIn);
-  if(state.phase!=='conversation') return state;
-  state.phase = 'women_placement';
-  const wp = {};
-  for(let i=0;i<state.womenCount;i++) wp[i]=null;
-  state.womenPlacements = wp;
-  return state;
-};
-Game3.placeWoman = function(stateIn, womanIndex, cardId){
-  const state = clone(stateIn);
-  if(state.phase!=='women_placement') return state;
-  if(!(womanIndex in state.womenPlacements)) return state;
-  const validTargets = [state.parentCardId, ...Object.values(state.selections)];
-  if(cardId!==null && !validTargets.includes(cardId)) return state;
-  state.womenPlacements[womanIndex] = cardId;
-  return state;
-};
-Game3.confirmPlacement = function(stateIn){
-  const state = clone(stateIn);
-  if(state.phase!=='women_placement') return state;
-  if(Object.values(state.womenPlacements).some(v=>v===null)) return state;
-  const entries = [{playerId: state.parentIndex, cardId: state.parentCardId, isParent:true}];
-  for(const [pid, cid] of Object.entries(state.selections)) entries.push({playerId:+pid, cardId:cid, isParent:false});
-  const roundResults = [];
-  entries.forEach(entry=>{
-    const womenHere = Object.values(state.womenPlacements).filter(c=>c===entry.cardId).length;
-    const card = state.fieldCards.find(c=>c.id===entry.cardId);
-    const success = womenHere===1;
-    let awarded = 0;
-    if(success){
-      awarded = card.value * (entry.isParent?2:1);
-      state.players[entry.playerId].stats[card.status] += awarded;
-      state.players[entry.playerId].history[card.status].push({round:state.currentRound, cardValue:card.value, wasParent:entry.isParent, awarded});
-    }
-    roundResults.push({playerId:entry.playerId, isParent:entry.isParent, card, womenHere, success, awarded});
+function revealAndScore(state){
+  const parentIndex = state.parentIndex;
+  const groups = {};
+  Object.entries(state.selections).forEach(([pid,cid])=>{
+    if(!groups[cid]) groups[cid]=[];
+    groups[cid].push(+pid);
   });
-  state.lastRoundResults = roundResults;
+  const results = [];
+  Object.entries(groups).forEach(([cid, pids])=>{
+    const card = state.fieldCards.find(c=>c.id===cid);
+    const hasParent = pids.includes(parentIndex);
+    let awardedTo = [];
+    if(hasParent && pids.length===2){
+      const child = pids.find(pid=>pid!==parentIndex);
+      const awarded = card.value*2;
+      state.players[child].stats[card.status] += awarded;
+      state.players[child].history[card.status].push({round:state.currentRound, cardValue:card.value, viaParentMatch:true, awarded});
+      awardedTo.push({playerId:child, awarded});
+    } else if(!hasParent && pids.length===2){
+      pids.forEach(pid=>{
+        const awarded = card.value*1;
+        state.players[pid].stats[card.status] += awarded;
+        state.players[pid].history[card.status].push({round:state.currentRound, cardValue:card.value, viaParentMatch:false, awarded});
+        awardedTo.push({playerId:pid, awarded});
+      });
+    }
+    results.push({card, playerIds:pids, hasParent, success:awardedTo.length>0, awardedTo});
+  });
+  state.lastRoundResults = results;
   state.phase = 'results';
   pushLog(state, `第${state.currentRound}ラウンド結果確定`);
   return state;
-};
+}
 Game3.nextRound = function(stateIn){
   const state = clone(stateIn);
   if(state.phase!=='results') return state;
@@ -336,10 +288,10 @@ function computeConfession(state){
         candidates = c2.filter(x=>x.v===m2).map(x=>x.p);
         reason = `+2/+3カード獲得回数(${m2}回)で優先`;
         if(candidates.length>1){
-          const c3 = candidates.map(p=>({p, v:p.history[stat].filter(h=>h.wasParent).length}));
+          const c3 = candidates.map(p=>({p, v:p.history[stat].filter(h=>h.viaParentMatch).length}));
           const m3 = Math.max(...c3.map(x=>x.v));
           candidates = c3.filter(x=>x.v===m3).map(x=>x.p);
-          reason = `親2倍獲得回数(${m3}回)で優先`;
+          reason = `親との2倍成立回数(${m3}回)で優先`;
           if(candidates.length>1){ candidates=[candidates[Math.floor(Math.random()*candidates.length)]]; reason='ランダム決定'; }
         }
       }
@@ -453,8 +405,8 @@ function renderStart(){
 function setErr(msg){ const n=document.getElementById('online-error'); if(n) n.textContent=msg; }
 function rulesHtml(){
   return `
-    <p>親が5枚（人数が多い時はそれ以上）のデート場所から1枚選び、続いて子が順番に残りから1枚ずつ選びます。会話フェイズの後、全員で女性たちをどのデート場所に行かせるか相談して決めます。</p>
-    <p>親が選んだ場所に女性がちょうど1人だけ来たら、そのカードのステータス値を<b>2倍</b>獲得。子の場所にちょうど1人だけなら<b>1倍</b>獲得。0人や2人以上なら報酬なし。</p>
+    <p>親が今回のラウンドの「狙われる側」になります。まず親がこっそりデート場所を1つ選び（他の人には分かりません）、続いて子どもたちも全員こっそり1つずつ選びます（子ども同士がかぶってもOK。誰が何を選んだかは分かりません）。</p>
+    <p>全員が選び終えたら、選んだ場所が一斉に公開されます。親の場所にちょうど1人の子どもが重なっていたら、その子がカードのステータス値を<b>2倍</b>獲得。親のいない場所に子ども2人がちょうど重なっていたら、その2人が<b>1倍</b>ずつ獲得します（3人以上重なった場合や、誰もいない場合は報酬なしです）。</p>
     <p>他プレイヤーの現在ステータスは最終ラウンドまで非公開です。最終ラウンドで全員のステータスを公開し、4つのステータスそれぞれの1位が「爆美女」を獲得。獲得数が最多のプレイヤーが優勝です。</p>
   `;
 }
@@ -627,10 +579,7 @@ function renderGame(code, ref){
   const mySeat = App.mySeat;
   if(mySeat<0){ root.innerHTML=''; root.appendChild(el(`<div class="card center"><h2>観戦中</h2></div>`)); return; }
   if(state.phase==='initial_stats') return renderInitialStats(state, ref, mySeat);
-  if(state.phase==='parent_pick') return renderParentPick(state, ref, mySeat);
-  if(state.phase==='child_pick') return renderChildPick(state, ref, mySeat);
-  if(state.phase==='conversation') return renderConversation(state, ref, mySeat);
-  if(state.phase==='women_placement') return renderWomenPlacement(state, ref, mySeat);
+  if(state.phase==='selecting') return renderSelecting(state, ref, mySeat);
   if(state.phase==='results') return renderResults(state, ref, mySeat);
   if(state.phase==='final') return renderFinal(state, ref, mySeat);
 }
@@ -670,100 +619,23 @@ function renderInitialStats(state, ref, mySeat){
   wrap.appendChild(btn);
   root.appendChild(wrap);
 }
-function renderParentPick(state, ref, mySeat){
+function renderSelecting(state, ref, mySeat){
   root.innerHTML='';
   const wrap = el(`<div></div>`);
   wrap.appendChild(statusBar(state));
   const isParent = state.parentIndex===mySeat;
+  const already = state.selections[mySeat]!==undefined;
+  const doneCount = Object.keys(state.selections).length;
   const card = el(`<div class="card"></div>`);
-  card.appendChild(el(`<h3>${isParent? '💌 あなたが親です。デート場所を1枚選んでください' : `${escapeHtml(state.players[state.parentIndex].name)}（親）が選択中…`}</h3>`));
-  const cw = el(`<div class="card-wrap"></div>`);
-  state.fieldCards.forEach(c=> cw.appendChild(dateCardEl(c, { onClick: isParent ? (id)=> action(ref, s=>Game3.parentPick(s, id)) : null })));
-  card.appendChild(cw);
-  wrap.appendChild(card);
-  wrap.appendChild(myStatsPanel(state.players[mySeat]));
-  root.appendChild(wrap);
-}
-function renderChildPick(state, ref, mySeat){
-  root.innerHTML='';
-  const wrap = el(`<div></div>`);
-  wrap.appendChild(statusBar(state));
-  const currentPicker = state.childTurnOrder[state.childTurnPointer];
-  const isMyTurn = currentPicker===mySeat;
-  const taken = new Set([state.parentCardId, ...Object.values(state.selections)]);
-  const card = el(`<div class="card"></div>`);
-  card.appendChild(el(`<h3>${isMyTurn? '👉 あなたの番です。デート場所を選んでください' : `${escapeHtml(state.players[currentPicker].name)} が選択中…`}</h3>`));
-  const cw = el(`<div class="card-wrap"></div>`);
-  state.fieldCards.forEach(c=>{
-    const isTaken = taken.has(c.id);
-    cw.appendChild(dateCardEl(c, { taken:isTaken, onClick: (isMyTurn && !isTaken) ? (id)=> action(ref, s=>Game3.childPick(s, mySeat, id)) : null }));
-  });
-  card.appendChild(cw);
-  wrap.appendChild(card);
-  wrap.appendChild(myStatsPanel(state.players[mySeat]));
-  root.appendChild(wrap);
-}
-function renderConversation(state, ref, mySeat){
-  root.innerHTML='';
-  const wrap = el(`<div></div>`);
-  wrap.appendChild(statusBar(state));
-  const card = el(`<div class="card"></div>`);
-  card.appendChild(el(`<h3>💬 会話フェイズ</h3><p class="muted small">それぞれの場所の「会話のタネ」で自由に話しましょう。</p>`));
-  const entries = [{pid:state.parentIndex, cid:state.parentCardId, isParent:true}, ...Object.entries(state.selections).map(([pid,cid])=>({pid:+pid, cid, isParent:false}))];
-  entries.forEach(en=>{
-    const c = state.fieldCards.find(x=>x.id===en.cid);
-    card.appendChild(el(`
-      <div class="result-line">
-        <span class="icon">${c.icon}</span>
-        <span>${en.isParent?'👑 ':''}<b>${escapeHtml(state.players[en.pid].name)}</b> → ${escapeHtml(c.name)}<br><span class="small muted">💬 ${escapeHtml(c.topic)}</span></span>
-      </div>
-    `));
-  });
-  const btn = el(`<button class="btn primary block">会話終了・女性配置へ</button>`);
-  btn.onclick = ()=> action(ref, s=>Game3.finishConversation(s));
-  card.appendChild(btn);
-  wrap.appendChild(card);
-  wrap.appendChild(myStatsPanel(state.players[mySeat]));
-  root.appendChild(wrap);
-}
-function renderWomenPlacement(state, ref, mySeat){
-  root.innerHTML='';
-  const wrap = el(`<div></div>`);
-  wrap.appendChild(statusBar(state));
-  const card = el(`<div class="card"></div>`);
-  card.appendChild(el(`<h3>👗 女性配置フェイズ</h3><p class="muted small">相談して、それぞれの女性をどのデート場所へ行かせるか決めてください（全員操作できます）。</p>`));
-  App.womenSel = App.womenSel===undefined ? null : App.womenSel;
-  const pool = el(`<div class="women-pool"></div>`);
-  Object.keys(state.womenPlacements).forEach(idx=>{
-    const placed = state.womenPlacements[idx]!==null;
-    const t = el(`<div class="woman-token ${placed?'placed':''}">👩</div>`);
-    t.title = '女性 '+(+idx+1);
-    t.onclick = ()=>{ App.womenSel = (App.womenSel===idx? null: idx); renderWomenPlacement(state, ref, mySeat); };
-    if(App.womenSel===idx) t.style.boxShadow='0 0 0 3px var(--pink-deep)';
-    pool.appendChild(t);
-  });
-  card.appendChild(pool);
-  if(App.womenSel!==null) card.appendChild(el(`<div class="small center muted" style="margin-bottom:8px;">女性${(+App.womenSel)+1}を配置する場所をタップしてください</div>`));
-  const entries = [{pid:state.parentIndex, cid:state.parentCardId, isParent:true}, ...Object.entries(state.selections).map(([pid,cid])=>({pid:+pid, cid, isParent:false}))];
-  entries.forEach(en=>{
-    const c = state.fieldCards.find(x=>x.id===en.cid);
-    const here = Object.entries(state.womenPlacements).filter(([k,v])=>v===en.cid).map(([k])=>k);
-    const target = el(`<div class="placement-target"></div>`);
-    target.appendChild(el(`<div class="ptitle">${c.icon} ${escapeHtml(c.name)}（${en.isParent?'👑 ':''}${escapeHtml(state.players[en.pid].name)}）</div>`));
-    const row = el(`<div class="row"></div>`);
-    here.forEach(()=> row.appendChild(el(`<div class="woman-token placed">👩</div>`)));
-    target.appendChild(row);
-    target.onclick = ()=>{ if(App.womenSel!==null){ action(ref, s=>Game3.placeWoman(s, +App.womenSel, en.cid)); App.womenSel=null; } };
-    card.appendChild(target);
-  });
-  const unassignBtn = el(`<div class="small help-toggle center" style="display:block;margin-bottom:8px;">配置をリセットしたい女性を選んで、ここをタップで未配置に戻す</div>`);
-  unassignBtn.onclick = ()=>{ if(App.womenSel!==null){ action(ref, s=>Game3.placeWoman(s, +App.womenSel, null)); App.womenSel=null; } };
-  card.appendChild(unassignBtn);
-  const allPlaced = Object.values(state.womenPlacements).every(v=>v!==null);
-  const confirmBtn = el(`<button class="btn primary block">この配置で確定する</button>`);
-  confirmBtn.disabled = !allPlaced;
-  confirmBtn.onclick = ()=> action(ref, s=>Game3.confirmPlacement(s));
-  card.appendChild(confirmBtn);
+  card.appendChild(el(`<h3>${isParent? '💌 あなたが今回の「親」です！こっそりデート場所を選んでください' : '🙊 デート場所をこっそり選んでください（親が誰か以外は秘密です）'}</h3>`));
+  card.appendChild(el(`<p class="small muted">選択済み: ${doneCount} / ${state.players.length}人（誰が何を選んだかは全員決定後に一斉公開されます）</p>`));
+  if(already){
+    card.appendChild(el(`<div class="center small muted" style="padding:20px 0;">選択済みです。他のプレイヤーを待っています…</div>`));
+  } else {
+    const cw = el(`<div class="card-wrap"></div>`);
+    state.fieldCards.forEach(c=> cw.appendChild(dateCardEl(c, { onClick: (id)=> action(ref, s=>Game3.selectLocation(s, mySeat, id)) })));
+    card.appendChild(cw);
+  }
   wrap.appendChild(card);
   wrap.appendChild(myStatsPanel(state.players[mySeat]));
   root.appendChild(wrap);
@@ -773,14 +645,19 @@ function renderResults(state, ref, mySeat){
   const wrap = el(`<div></div>`);
   wrap.appendChild(statusBar(state));
   const card = el(`<div class="card"></div>`);
-  card.appendChild(el(`<h3>📋 第${state.currentRound}ラウンド結果</h3>`));
+  card.appendChild(el(`<h3>📋 第${state.currentRound}ラウンド結果公開</h3><p class="small muted">👑 = 今回の親</p>`));
   state.lastRoundResults.forEach(r=>{
     const meta = STATUS_META[r.card.status];
+    const names = r.playerIds.map(pid=> (pid===state.parentIndex?'👑 ':'')+escapeHtml(state.players[pid].name)).join('、');
+    let outcome;
+    if(r.success && r.hasParent) outcome = `💕 2人きり成功！（親と一致）${meta.emoji}${meta.label} +${r.awardedTo[0].awarded}`;
+    else if(r.success && !r.hasParent) outcome = `💞 子ども同士で2人きり成立！${meta.emoji}${meta.label} 各+${r.awardedTo[0].awarded}`;
+    else outcome = '不成立（報酬なし）';
     card.appendChild(el(`
       <div class="result-line ${r.success?'success':''}">
         <span class="icon">${r.card.icon}</span>
-        <span>${r.isParent?'👑 ':''}<b>${escapeHtml(state.players[r.playerId].name)}</b> - ${escapeHtml(r.card.name)}（女性${r.womenHere}人）<br>
-        <span class="small">${r.success? `💕 2人きり成功！ ${meta.emoji}${meta.label} +${r.awarded}` : '不成立（報酬なし）'}</span></span>
+        <span><b>${escapeHtml(r.card.name)}</b>（${meta.emoji}${meta.label}+${r.card.value}）: ${names}<br>
+        <span class="small">${outcome}</span></span>
       </div>
     `));
   });
